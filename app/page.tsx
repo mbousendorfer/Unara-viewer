@@ -5,12 +5,15 @@ import { Activity, ArrowUpRight, Clock3, Droplets, Milk, Ruler } from "lucide-re
 import type { LucideIcon } from "lucide-react";
 
 import { AppShell } from "@/components/app-shell";
+import { ErrorState, LoadingState, OfflineEmptyState, OfflineState } from "@/components/data-states";
 import { EmptyState } from "@/components/empty-state";
 import { InsightCard } from "@/components/insight-card";
 import { MetricCard } from "@/components/metric-card";
 import { SectionHeader } from "@/components/section-header";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEvents } from "@/hooks/use-events";
+import { eventTheme, type EventTone } from "@/lib/event-theme";
 import { getDashboardSummary, getDiaperStats, getFeedStats, getGrowthStats, getPumpStats, getSleepStats, sortEvents } from "@/lib/analytics";
 import {
   formatDateTime,
@@ -20,6 +23,7 @@ import {
   formatVolumeMl,
   formatWeightKg,
 } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 function StatPreviewCard({
   href,
@@ -27,32 +31,39 @@ function StatPreviewCard({
   metric,
   detail,
   icon: Icon,
-  toneClass,
+  tone,
 }: {
   href: string;
   title: string;
   metric: string;
   detail: string;
   icon: LucideIcon;
-  toneClass: string;
+  tone: EventTone;
 }) {
+  const palette = eventTheme[tone];
+
   return (
     <Link href={href} className="group">
       <Card className="h-full overflow-hidden border-border/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(245,241,234,0.98))] transition hover:-translate-y-1 hover:border-foreground/12 hover:shadow-[0_28px_60px_-34px_rgba(67,73,54,0.42)] dark:bg-[linear-gradient(180deg,rgba(26,31,33,0.98),rgba(19,24,25,0.96))] dark:hover:shadow-[0_28px_60px_-34px_rgba(0,0,0,0.8)]">
-        <div className={`h-1.5 w-full ${toneClass}`} />
+        <div className={`h-1.5 w-full ${palette.topBorder}`} />
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">{title}</p>
             <CardTitle className="text-2xl">{metric}</CardTitle>
           </div>
-          <div className="rounded-[1.2rem] bg-secondary p-3 text-secondary-foreground">
+          <div className={`rounded-[1.2rem] p-3 ${palette.icon}`}>
             <Icon className="h-5 w-5" />
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm leading-6 text-muted-foreground">{detail}</p>
           <div className="pt-2">
-            <span className="inline-flex min-h-11 items-center gap-2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-white shadow-[0_16px_28px_-20px_rgba(47,58,50,0.85)] transition group-hover:bg-primary">
+            <span
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "pointer-events-none border-foreground/10 bg-card/92 shadow-[0_16px_28px_-22px_rgba(67,73,54,0.28)] group-hover:border-foreground/18 group-hover:bg-card dark:border-white/14 dark:bg-white/5 dark:text-[#eef1eb] dark:group-hover:border-white/24 dark:group-hover:bg-white/8",
+              )}
+            >
               Open detailed view
               <ArrowUpRight className="h-4 w-4" />
             </span>
@@ -64,7 +75,7 @@ function StatPreviewCard({
 }
 
 export default function HomePage() {
-  const { events } = useEvents();
+  const { events, isLoading, isOffline, loadError, syncedAt } = useEvents();
   const summary = getDashboardSummary(events);
   const sortedEvents = sortEvents(events);
   const latestEvent = sortedEvents[0] ?? null;
@@ -79,10 +90,18 @@ export default function HomePage() {
       title="Your baby&apos;s routine at a glance"
       subtitle="See what happened today, what shifted this week, and where to explore deeper trends from your Nara Baby exports."
     >
-      {events.length === 0 ? (
+      {isLoading ? (
+        <LoadingState />
+      ) : events.length === 0 && isOffline ? (
+        <OfflineEmptyState />
+      ) : events.length === 0 && loadError ? (
+        <ErrorState message={loadError} />
+      ) : events.length === 0 ? (
         <EmptyState />
       ) : (
         <>
+          {isOffline ? <OfflineState syncedAt={syncedAt} /> : null}
+          {!isOffline && loadError ? <ErrorState message={loadError} /> : null}
           <section className="grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
             <Card className="bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(247,244,238,0.94))] dark:bg-[linear-gradient(135deg,rgba(26,31,33,0.96),rgba(19,24,25,0.94))]">
               <CardHeader className="gap-3">
@@ -116,6 +135,7 @@ export default function HomePage() {
             <InsightCard
               title="What to look at first"
               detail={sleepStats.insights[2]?.detail ?? "Review the detailed analytics pages to uncover routine changes over time."}
+              tone="sleep"
             />
           </section>
 
@@ -150,9 +170,9 @@ export default function HomePage() {
               description="Quick observations that summarize routine patterns without forcing you into a full dashboard workflow."
             />
             <div className="grid gap-4 lg:grid-cols-3">
-              <InsightCard title={feedStats.insights[0]?.title ?? "Feed insight"} detail={feedStats.insights[0]?.detail ?? "No feed pattern available yet."} />
-              <InsightCard title={sleepStats.insights[1]?.title ?? "Sleep insight"} detail={sleepStats.insights[1]?.detail ?? "No sleep pattern available yet."} />
-              <InsightCard title={diaperStats.insights[0]?.title ?? "Diaper insight"} detail={diaperStats.insights[0]?.detail ?? "No diaper pattern available yet."} />
+              <InsightCard title={feedStats.insights[0]?.title ?? "Feed insight"} detail={feedStats.insights[0]?.detail ?? "No feed pattern available yet."} tone="feed" />
+              <InsightCard title={sleepStats.insights[1]?.title ?? "Sleep insight"} detail={sleepStats.insights[1]?.detail ?? "No sleep pattern available yet."} tone="sleep" />
+              <InsightCard title={diaperStats.insights[0]?.title ?? "Diaper insight"} detail={diaperStats.insights[0]?.detail ?? "No diaper pattern available yet."} tone="diaper" />
             </div>
           </section>
 
@@ -169,7 +189,7 @@ export default function HomePage() {
                 metric={formatVolumeMl(feedStats.averageMl)}
                 detail={`Typical bottle size. ${feedStats.insights[1]?.detail ?? ""}`}
                 icon={Milk}
-                toneClass="bg-[#F6C453]"
+                tone="feed"
               />
               <StatPreviewCard
                 href="/stats/sleep"
@@ -177,7 +197,7 @@ export default function HomePage() {
                 metric={formatDurationFromSeconds(sleepStats.averageSeconds)}
                 detail={`Typical sleep stretch. ${sleepStats.insights[2]?.detail ?? ""}`}
                 icon={Clock3}
-                toneClass="bg-[#A9C3E6]"
+                tone="sleep"
               />
               <StatPreviewCard
                 href="/stats/diaper"
@@ -185,7 +205,7 @@ export default function HomePage() {
                 metric={diaperStats.topType?.[0] ?? "No data"}
                 detail={diaperStats.insights[1]?.detail ?? "No diaper timing insight available yet."}
                 icon={Droplets}
-                toneClass="bg-[#E6DCC8]"
+                tone="diaper"
               />
               <StatPreviewCard
                 href="/stats/pump"
@@ -193,7 +213,7 @@ export default function HomePage() {
                 metric={formatVolumeMl(pumpStats.totalMl)}
                 detail={pumpStats.insights[0]?.detail ?? "No pump trend available yet."}
                 icon={Activity}
-                toneClass="bg-[#D6A6A0]"
+                tone="pump"
               />
               <StatPreviewCard
                 href="/stats/growth"
@@ -201,7 +221,7 @@ export default function HomePage() {
                 metric={formatWeightKg(growthStats.latest?.weightKg)}
                 detail={growthStats.insights[0]?.detail ?? "No growth trend available yet."}
                 icon={Ruler}
-                toneClass="bg-[#9CC48D]"
+                tone="growth"
               />
             </div>
           </section>

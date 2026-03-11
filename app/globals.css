@@ -29,28 +29,32 @@
   --chart-5: #c4b2d6;
   --font-sans: "Avenir Next", "Nunito Sans", "Segoe UI", sans-serif;
   --font-serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
 }
 
 .dark {
-  --background: #131718;
-  --foreground: #edf0e8;
-  --card: rgba(24, 29, 31, 0.92);
-  --card-foreground: #edf0e8;
-  --popover: #181d1f;
-  --popover-foreground: #edf0e8;
-  --primary: #a6bf9e;
+  --background: #111517;
+  --foreground: #f4f6f0;
+  --card: rgba(26, 32, 34, 0.94);
+  --card-foreground: #f4f6f0;
+  --popover: #1a2022;
+  --popover-foreground: #f4f6f0;
+  --primary: #bed4b5;
   --primary-foreground: #101413;
-  --secondary: #2b3332;
-  --secondary-foreground: #d7ddd2;
-  --muted: #202728;
-  --muted-foreground: #a7b0a6;
-  --accent: #283131;
-  --accent-foreground: #dfe6da;
+  --secondary: #31393a;
+  --secondary-foreground: #e3e9de;
+  --muted: #252d2f;
+  --muted-foreground: #c0c8be;
+  --accent: #2c3537;
+  --accent-foreground: #ebf0e5;
   --destructive: #d07d73;
   --destructive-foreground: #120f0f;
-  --border: rgba(237, 240, 232, 0.1);
-  --input: rgba(237, 240, 232, 0.1);
-  --ring: rgba(166, 191, 158, 0.35);
+  --border: rgba(244, 246, 240, 0.13);
+  --input: rgba(244, 246, 240, 0.13);
+  --ring: rgba(190, 212, 181, 0.4);
 }
 
 @theme inline {
@@ -83,6 +87,12 @@
 
 * {
   @apply border-border;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  overflow-x: hidden;
 }
 
 body {
@@ -93,17 +103,33 @@ body {
     radial-gradient(circle at top right, rgba(169, 195, 230, 0.16), transparent 24rem),
     linear-gradient(180deg, #fbfaf7 0%, #f7f6f3 45%, #f2efe8 100%);
   min-height: 100vh;
+  min-height: 100dvh;
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
 }
 
 .dark body {
   background-image:
-    radial-gradient(circle at top left, rgba(246, 196, 83, 0.09), transparent 26rem),
-    radial-gradient(circle at top right, rgba(169, 195, 230, 0.1), transparent 24rem),
-    linear-gradient(180deg, #171c1d 0%, #131718 45%, #101314 100%);
+    radial-gradient(circle at top left, rgba(246, 196, 83, 0.07), transparent 24rem),
+    radial-gradient(circle at top right, rgba(169, 195, 230, 0.08), transparent 22rem),
+    linear-gradient(180deg, #151a1c 0%, #111517 45%, #0d1112 100%);
 }
 
 a {
   @apply no-underline;
+}
+
+button,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+@media (display-mode: standalone) {
+  body {
+    overscroll-behavior-y: contain;
+  }
 }
 
 ::selection {

@@ -17,13 +17,19 @@ type AppDataContextValue = {
   events: NaraEvent[];
   profile: ProfileMetadata | null;
   isLoading: boolean;
+  isOffline: boolean;
+  isStandalone: boolean;
+  canInstall: boolean;
   isImporting: boolean;
   isClearing: boolean;
+  loadError: string | null;
   importSummary: ImportSummary | null;
   importError: string | null;
+  syncedAt: string | null;
   refresh: () => Promise<void>;
   importFile: (file: File) => Promise<void>;
   clearData: () => Promise<void>;
+  installApp: () => Promise<boolean>;
 };
 
 const AppDataContext = createContext<AppDataContextValue | null>(null);
@@ -32,34 +38,57 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [events, setEvents] = useState<NaraEvent[]>([]);
   const [profile, setProfile] = useState<ProfileMetadata | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isOffline, setIsOffline] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [importSummary, setImportSummary] = useState<ImportSummary | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [syncedAt, setSyncedAt] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    const response = await fetch("/api/data", { cache: "no-store" });
-    if (!response.ok) {
-      throw new Error("Unable to load data.");
+    try {
+      setLoadError(null);
+
+      const response = await fetch("/api/data", { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error("Unable to load data.");
+      }
+
+      const payload = (await response.json()) as {
+        events: NaraEvent[];
+        profile: ProfileMetadata | null;
+      };
+
+      startTransition(() => {
+        setEvents(sortEvents(payload.events));
+        setProfile(payload.profile);
+        setSyncedAt(new Date().toISOString());
+        setIsLoading(false);
+      });
+    } catch (error) {
+      startTransition(() => {
+        setLoadError(error instanceof Error ? error.message : "Unable to load data.");
+        setIsLoading(false);
+      });
     }
-
-    const payload = (await response.json()) as {
-      events: NaraEvent[];
-      profile: ProfileMetadata | null;
-    };
-
-    startTransition(() => {
-      setEvents(sortEvents(payload.events));
-      setProfile(payload.profile);
-      setIsLoading(false);
-    });
   }, []);
 
   useEffect(() => {
-    void refresh().catch((error) => {
-      setImportError(error instanceof Error ? error.message : "Unable to load data.");
-      setIsLoading(false);
-    });
+    const updateConnectivity = () => {
+      setIsOffline(typeof window !== "undefined" ? !window.navigator.onLine : false);
+    };
+
+    updateConnectivity();
+    window.addEventListener("online", updateConnectivity);
+    window.addEventListener("offline", updateConnectivity);
+
+    void refresh();
+
+    return () => {
+      window.removeEventListener("online", updateConnectivity);
+      window.removeEventListener("offline", updateConnectivity);
+    };
   }, [refresh]);
 
   const importFile = useCallback(async (file: File) => {
@@ -106,6 +135,8 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         setEvents([]);
         setProfile(null);
         setImportSummary(null);
+        setSyncedAt(null);
+        setLoadError(null);
       });
     } catch (error) {
       setImportError(error instanceof Error ? error.message : "Unable to erase stored data.");
@@ -119,15 +150,35 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       events,
       profile,
       isLoading,
+      isOffline,
+      isStandalone: false,
+      canInstall: false,
       isImporting,
       isClearing,
+      loadError,
       importSummary,
       importError,
+      syncedAt,
       refresh,
       importFile,
       clearData,
+      installApp: async () => false,
     }),
-    [events, profile, isLoading, isImporting, isClearing, importSummary, importError, refresh, importFile, clearData],
+    [
+      events,
+      profile,
+      isLoading,
+      isOffline,
+      isImporting,
+      isClearing,
+      loadError,
+      importSummary,
+      importError,
+      syncedAt,
+      refresh,
+      importFile,
+      clearData,
+    ],
   );
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;

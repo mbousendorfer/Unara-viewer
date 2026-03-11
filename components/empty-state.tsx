@@ -1,5 +1,6 @@
 import { FileUp } from "lucide-react";
 
+import { ImportCard } from "@/components/import-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function EmptyState() {
@@ -16,8 +17,9 @@ export function EmptyState() {
           No data yet. Import a Nara export to see today&apos;s activity, recent changes, and longer-term trends.
         </p>
       </CardHeader>
-      <CardContent className="text-sm leading-6 text-muted-foreground">
-        The import stays local to this app and syncs events into the on-device database using `_activityKey`.
+      <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
+        <p>The import stays local to this app and syncs events into the on-device database using `_activityKey`.</p>
+        <ImportCard />
       </CardContent>
     </Card>
   );

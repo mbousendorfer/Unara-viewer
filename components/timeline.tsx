@@ -277,22 +277,22 @@ export function TimelineDateRange({
   onRangeEndChange: (value: string) => void;
 }) {
   return (
-    <div className="flex flex-nowrap items-center gap-2">
+    <div className="grid gap-2 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
       <Input
         type="date"
         value={rangeStart}
         onChange={(event) => onRangeStartChange(event.target.value)}
         max={rangeEnd}
-        className="min-w-40"
+        className="min-w-0"
         aria-label="Start date"
       />
-      <span className="px-1 text-sm text-muted-foreground">to</span>
+      <span className="px-1 text-center text-sm text-muted-foreground">to</span>
       <Input
         type="date"
         value={rangeEnd}
         onChange={(event) => onRangeEndChange(event.target.value)}
         min={rangeStart}
-        className="min-w-40"
+        className="min-w-0"
         aria-label="End date"
       />
     </div>
@@ -328,16 +328,15 @@ export function Timeline({
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
           Event type
         </p>
-        <div className="-mx-1 overflow-x-auto px-1">
-          <div className="inline-flex min-w-full gap-2 pb-1">
+        <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => setType("all")}
               className={cn(
-                "min-h-10 rounded-full border px-4 py-2 text-sm font-medium transition",
+                "min-h-11 rounded-full border px-4 py-2 text-sm font-medium transition",
                 type === "all"
-                  ? "border-transparent bg-foreground text-white"
-                  : "border-border bg-card/80 text-muted-foreground hover:bg-card hover:text-foreground",
+                  ? "border-transparent bg-foreground text-white dark:border-primary/28 dark:bg-primary/18 dark:text-primary"
+                  : "border-border bg-card/80 text-muted-foreground hover:bg-card hover:text-foreground dark:border-white/12 dark:bg-[#151b1d] dark:text-[#d4d9d1] dark:hover:bg-[#1b2224] dark:hover:text-[#f2f4ee]",
               )}
             >
               All
@@ -348,16 +347,15 @@ export function Timeline({
                 type="button"
                 onClick={() => setType(eventType)}
                 className={cn(
-                  "min-h-10 rounded-full border px-4 py-2 text-sm font-medium whitespace-nowrap transition",
+                  "min-h-11 rounded-full border px-4 py-2 text-sm font-medium transition",
                   type === eventType
-                    ? "border-transparent bg-foreground text-white"
-                    : "border-border bg-card/80 text-muted-foreground hover:bg-card hover:text-foreground",
+                    ? "border-transparent bg-foreground text-white dark:border-primary/28 dark:bg-primary/18 dark:text-primary"
+                    : "border-border bg-card/80 text-muted-foreground hover:bg-card hover:text-foreground dark:border-white/12 dark:bg-[#151b1d] dark:text-[#d4d9d1] dark:hover:bg-[#1b2224] dark:hover:text-[#f2f4ee]",
                 )}
               >
                 {eventType}
               </button>
             ))}
-          </div>
         </div>
       </div>
 

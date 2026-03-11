@@ -1,7 +1,7 @@
 "use client";
 
-import { CheckCircle2, Upload } from "lucide-react";
-import { useRef } from "react";
+import { CheckCircle2, FileUp, Upload } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,20 @@ import { cn } from "@/lib/utils";
 
 export function ImportCard({ inline = false }: { inline?: boolean }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const { handleImport, isImporting, summary, error } = useImportCsv();
+
+  const summaryLabel = useMemo(() => {
+    if (!summary) {
+      return null;
+    }
+
+    return `${summary.inserted} added, ${summary.updated} updated, ${summary.deleted} removed`;
+  }, [summary]);
+
+  async function importFile(file: File) {
+    await handleImport(file);
+  }
 
   const trigger = (
     <>
@@ -22,18 +35,20 @@ export function ImportCard({ inline = false }: { inline?: boolean }) {
         onChange={(event) => {
           const file = event.target.files?.[0];
           if (file) {
-            void handleImport(file);
+            void importFile(file);
             event.target.value = "";
           }
         }}
       />
       <Button
-        className={cn(inline ? "w-full sm:w-auto" : "w-full sm:w-auto")}
-        onClick={() => inputRef.current?.click()}
+        className={cn("w-full sm:w-auto", inline ? "" : "sm:min-w-40")}
+        onClick={() => {
+          inputRef.current?.click();
+        }}
         disabled={isImporting}
       >
         <Upload className="h-4 w-4" />
-        {isImporting ? "Importing..." : "Import CSV"}
+        {isImporting ? "Importing..." : "Choose CSV"}
       </Button>
     </>
   );
@@ -42,7 +57,7 @@ export function ImportCard({ inline = false }: { inline?: boolean }) {
     return (
       <div className="flex flex-col items-stretch gap-2 sm:items-end">
         {trigger}
-        {summary ? <p className="text-sm text-muted-foreground sm:text-right">Import completed.</p> : null}
+        {summaryLabel ? <p className="text-sm text-muted-foreground sm:text-right">{summaryLabel}</p> : null}
         {error ? <p className="text-sm text-destructive sm:text-right">{error}</p> : null}
       </div>
     );
@@ -52,14 +67,48 @@ export function ImportCard({ inline = false }: { inline?: boolean }) {
     <Card className="bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(247,244,238,0.98))] dark:bg-[linear-gradient(180deg,rgba(26,31,33,0.96),rgba(19,24,25,0.96))]">
       <CardHeader>
         <CardTitle>Import CSV</CardTitle>
-        <CardDescription>Upload a Nara Baby export to sync your local analytics database using `_activityKey`.</CardDescription>
+        <CardDescription>Open the CSV from Files or Downloads to sync your local analytics database using `_activityKey`.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {trigger}
-        {summary ? (
+        <div
+          className={cn(
+            "rounded-[1.5rem] border border-dashed border-border bg-muted/35 p-4 transition",
+            isDragging && "border-primary bg-primary/8",
+          )}
+          onDragOver={(event) => {
+            event.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={(event) => {
+            event.preventDefault();
+            setIsDragging(false);
+
+            const file = event.dataTransfer.files?.[0];
+            if (file) {
+              void importFile(file);
+            }
+          }}
+        >
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="rounded-[1.1rem] bg-primary/12 p-3 text-primary">
+                <FileUp className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-foreground">Large touch target for phone imports</p>
+                <p className="text-sm leading-6 text-muted-foreground">
+                  Tap to pick a file, or drag a CSV here on desktop.
+                </p>
+              </div>
+            </div>
+            {trigger}
+          </div>
+        </div>
+        {summaryLabel ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <CheckCircle2 className="h-4 w-4 text-primary" />
-            Import completed successfully.
+            {summaryLabel}
           </div>
         ) : null}
         {error ? <p className="text-sm text-destructive">{error}</p> : null}

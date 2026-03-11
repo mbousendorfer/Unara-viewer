@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 
 import { AppDataProvider } from "@/components/app-data-provider";
+import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
 import { ThemeProvider } from "@/components/theme-provider";
 
 import "./globals.css";
@@ -9,6 +10,33 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Nara Insights",
   description: "Personal analytics for Nara Baby CSV exports.",
+  applicationName: "Nara Insights",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Nara Insights",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-maskable.svg", type: "image/svg+xml", rel: "mask-icon" },
+    ],
+    apple: [{ url: "/apple-icon" }],
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f7f6f3" },
+    { media: "(prefers-color-scheme: dark)", color: "#131718" },
+  ],
 };
 
 export default function RootLayout({
@@ -34,7 +62,10 @@ export default function RootLayout({
           `}
         </Script>
         <ThemeProvider>
-          <AppDataProvider>{children}</AppDataProvider>
+          <AppDataProvider>
+            <ServiceWorkerRegistration />
+            {children}
+          </AppDataProvider>
         </ThemeProvider>
       </body>
     </html>

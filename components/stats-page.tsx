@@ -6,12 +6,14 @@ import { Activity, Clock3, Droplets, Milk, Ruler } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { ChartCard } from "@/components/chart-card";
 import { DailyChart, HourlyChart, MultiLineChart, MultiSeriesBarChart, RollingAverageChart, WeightCurveChart } from "@/components/charts";
+import { ErrorState, LoadingState, OfflineEmptyState, OfflineState } from "@/components/data-states";
 import { EmptyState } from "@/components/empty-state";
 import { InsightList } from "@/components/insight-list";
 import { MetricCard } from "@/components/metric-card";
 import { TimeframeSelect } from "@/components/timeframe-select";
 import { useEvents } from "@/hooks/use-events";
 import { useProfileMetadata } from "@/hooks/use-profile-metadata";
+import type { EventTone } from "@/lib/event-theme";
 import {
   buildFeedDailySeries,
   buildFeedHourlySeries,
@@ -49,11 +51,13 @@ function TimeframedChartCard({
   title,
   description,
   defaultTimeframe = 14,
+  tone = "routine",
   children,
 }: {
   title: string;
   description: string;
   defaultTimeframe?: ChartTimeframe;
+  tone?: EventTone;
   children: (timeframe: ChartTimeframe) => React.ReactNode;
 }) {
   const [timeframe, setTimeframe] = useState<ChartTimeframe>(defaultTimeframe);
@@ -63,6 +67,7 @@ function TimeframedChartCard({
       title={title}
       description={description}
       action={<TimeframeSelect value={timeframe} onChange={setTimeframe} />}
+      tone={tone}
     >
       {children(timeframe)}
     </ChartCard>
@@ -73,11 +78,13 @@ function DiaperTypeToggleChart({
   title,
   description,
   defaultTimeframe = 30,
+  tone = "routine",
   renderChart,
 }: {
   title: string;
   description: string;
   defaultTimeframe?: ChartTimeframe;
+  tone?: EventTone;
   renderChart: (timeframe: ChartTimeframe, enabledTypes: typeof DIAPER_TYPES[number][]) => React.ReactNode;
 }) {
   const [timeframe, setTimeframe] = useState<ChartTimeframe>(defaultTimeframe);
@@ -98,6 +105,7 @@ function DiaperTypeToggleChart({
       title={title}
       description={description}
       action={<TimeframeSelect value={timeframe} onChange={setTimeframe} />}
+      tone={tone}
     >
       <div className="mb-4 flex flex-wrap gap-2">
         {DIAPER_TYPES.map((type) => {
@@ -124,13 +132,28 @@ function DiaperTypeToggleChart({
 }
 
 export function StatsPage({ kind }: { kind: StatsKind }) {
-  const { events } = useEvents();
+  const { events, isLoading, isOffline, loadError, syncedAt } = useEvents();
   const { profile } = useProfileMetadata();
+
+  const statusNotice = (
+    <>
+      {isOffline ? <OfflineState syncedAt={syncedAt} /> : null}
+      {!isOffline && loadError ? <ErrorState message={loadError} /> : null}
+    </>
+  );
+
+  if (isLoading) {
+    return (
+      <AppShell title="Nara Insights" subtitle="Loading your local analytics snapshot.">
+        <LoadingState />
+      </AppShell>
+    );
+  }
 
   if (events.length === 0) {
     return (
       <AppShell title="Nara Insights" subtitle="Import data to unlock personal analytics.">
-        <EmptyState />
+        {isOffline ? <OfflineEmptyState /> : loadError ? <ErrorState message={loadError} /> : <EmptyState />}
       </AppShell>
     );
   }
@@ -139,6 +162,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
     const stats = getFeedStats(events);
     return (
       <AppShell title="Feed Analytics" subtitle="Bottle rhythm, timing patterns, and practical feeding trends.">
+        {statusNotice}
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <MetricCard
             title="Typical total bottle"
@@ -173,7 +197,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
           />
         </section>
         <section className="grid gap-4 lg:grid-cols-2">
-          <TimeframedChartCard title="Daily intake by source" description="Formula and breast milk intake across the selected timeframe.">
+          <TimeframedChartCard title="Daily intake by source" description="Formula and breast milk intake across the selected timeframe." tone="feed">
             {(timeframe) => (
               <MultiSeriesBarChart
                 data={buildFeedDailySeries(stats.events, timeframe)}
@@ -185,7 +209,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
               />
             )}
           </TimeframedChartCard>
-          <TimeframedChartCard title="Hourly intake by source" description="When formula and breast milk intake cluster through the day.">
+          <TimeframedChartCard title="Hourly intake by source" description="When formula and breast milk intake cluster through the day." tone="feed">
             {(timeframe) => (
               <MultiSeriesBarChart
                 data={buildFeedHourlySeries(stats.events, timeframe)}
@@ -199,7 +223,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
           </TimeframedChartCard>
         </section>
         <section className="grid gap-4 lg:grid-cols-[1.8fr_1fr]">
-          <TimeframedChartCard title="Rolling average by source" description="7-day smoothing of formula and breast milk intake for the selected timeframe.">
+          <TimeframedChartCard title="Rolling average by source" description="7-day smoothing of formula and breast milk intake for the selected timeframe." tone="feed">
             {(timeframe) => {
               const series = buildFeedDailySeries(stats.events, timeframe);
               const formulaRolling = buildRollingAverage(
@@ -224,7 +248,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
               );
             }}
           </TimeframedChartCard>
-          <InsightList items={stats.insights} />
+          <InsightList items={stats.insights} tone="feed" />
         </section>
       </AppShell>
     );
@@ -234,6 +258,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
     const stats = getSleepStats(events);
     return (
       <AppShell title="Sleep Analytics" subtitle="Sleep rhythm, stretch length, and timing patterns.">
+        {statusNotice}
         <section className="grid gap-4 md:grid-cols-3">
           <MetricCard
             title="Typical stretch variation"
@@ -268,7 +293,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
           />
         </section>
         <section className="grid gap-4 lg:grid-cols-2">
-          <TimeframedChartCard title="Daily sleep hours" description="Sleep volume for the selected timeframe.">
+          <TimeframedChartCard title="Daily sleep hours" description="Sleep volume for the selected timeframe." tone="sleep">
             {(timeframe) => (
               <DailyChart
                 data={buildDailyAggregate(stats.events, timeframe, (event) => (event.durationSeconds ?? 0) / 3600)}
@@ -276,7 +301,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
               />
             )}
           </TimeframedChartCard>
-          <TimeframedChartCard title="Hourly distribution" description="Common sleep start windows for the selected timeframe.">
+          <TimeframedChartCard title="Hourly distribution" description="Common sleep start windows for the selected timeframe." tone="sleep">
             {(timeframe) => (
               <HourlyChart
                 data={buildHourlyDistribution(stats.events, () => 1, timeframe)}
@@ -286,7 +311,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
           </TimeframedChartCard>
         </section>
         <section className="grid gap-4 lg:grid-cols-[1.8fr_1fr]">
-          <TimeframedChartCard title="Rolling average" description="7-day sleep average by day for the selected timeframe.">
+          <TimeframedChartCard title="Rolling average" description="7-day sleep average by day for the selected timeframe." tone="sleep">
             {(timeframe) => (
               <RollingAverageChart
                 data={buildRollingAverage(buildDailyAggregate(stats.events, timeframe, (event) => (event.durationSeconds ?? 0) / 3600))}
@@ -294,7 +319,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
               />
             )}
           </TimeframedChartCard>
-          <InsightList items={stats.insights} />
+          <InsightList items={stats.insights} tone="sleep" />
         </section>
       </AppShell>
     );
@@ -304,6 +329,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
     const stats = getDiaperStats(events);
     return (
       <AppShell title="Diaper Analytics" subtitle="The essentials for diaper rhythm, poop timing, and wet-diaper monitoring.">
+        {statusNotice}
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <MetricCard
             title="Most common type"
@@ -340,6 +366,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
           <DiaperTypeToggleChart
             title="Daily diaper patterns"
             description="All diaper types across the selected timeframe."
+            tone="diaper"
             renderChart={(timeframe, enabledTypes) => (
               <MultiSeriesBarChart
                 data={buildDiaperDailySeries(stats.events, timeframe)}
@@ -351,6 +378,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
           <DiaperTypeToggleChart
             title="Diaper timing by hour"
             description="Compare when each diaper type tends to happen."
+            tone="diaper"
             renderChart={(timeframe, enabledTypes) => (
               <MultiSeriesBarChart
                 data={buildDiaperHourlySeries(stats.events, timeframe)}
@@ -361,7 +389,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
           />
         </section>
         <section className="grid gap-4 lg:grid-cols-[1.8fr_1fr]">
-          <TimeframedChartCard title="Rolling average" description="7-day diaper change average for the selected timeframe.">
+          <TimeframedChartCard title="Rolling average" description="7-day diaper change average for the selected timeframe." tone="diaper">
             {(timeframe) => (
               <RollingAverageChart
                 data={buildRollingAverage(buildDailyAggregate(stats.events, timeframe, () => 1))}
@@ -369,7 +397,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
               />
             )}
           </TimeframedChartCard>
-          <InsightList items={stats.insights} />
+          <InsightList items={stats.insights} tone="diaper" />
         </section>
       </AppShell>
     );
@@ -379,6 +407,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
     const stats = getPumpStats(events);
     return (
       <AppShell title="Pump Analytics" subtitle="Yield, duration, and session timing for pumping records.">
+        {statusNotice}
         <section className="grid gap-4 md:grid-cols-3">
           <MetricCard
             title="Total yield"
@@ -410,7 +439,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
           />
         </section>
         <section className="grid gap-4 lg:grid-cols-2">
-          <TimeframedChartCard title="Daily yield" description="Pump volume for the selected timeframe.">
+          <TimeframedChartCard title="Daily yield" description="Pump volume for the selected timeframe." tone="pump">
             {(timeframe) => (
               <DailyChart
                 data={buildDailyAggregate(stats.events, timeframe, (event) => event.totalVolumeMl ?? 0)}
@@ -418,7 +447,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
               />
             )}
           </TimeframedChartCard>
-          <TimeframedChartCard title="Hourly distribution" description="When pump sessions tend to happen for the selected timeframe.">
+          <TimeframedChartCard title="Hourly distribution" description="When pump sessions tend to happen for the selected timeframe." tone="pump">
             {(timeframe) => (
               <HourlyChart
                 data={buildHourlyDistribution(stats.events, () => 1, timeframe)}
@@ -428,7 +457,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
           </TimeframedChartCard>
         </section>
         <section className="grid gap-4 lg:grid-cols-[1.8fr_1fr]">
-          <TimeframedChartCard title="Rolling average" description="7-day smoothed volume trend for the selected timeframe.">
+          <TimeframedChartCard title="Rolling average" description="7-day smoothed volume trend for the selected timeframe." tone="pump">
             {(timeframe) => (
               <RollingAverageChart
                 data={buildRollingAverage(buildDailyAggregate(stats.events, timeframe, (event) => event.totalVolumeMl ?? 0))}
@@ -436,7 +465,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
               />
             )}
           </TimeframedChartCard>
-          <InsightList items={stats.insights} />
+          <InsightList items={stats.insights} tone="pump" />
         </section>
       </AppShell>
     );
@@ -446,6 +475,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
 
   return (
     <AppShell title="Growth Analytics" subtitle="Weight curve over age, with WHO reference curves in the background.">
+      {statusNotice}
       <section className="grid gap-4 md:grid-cols-3">
         <MetricCard title="Latest weight" value={formatWeightKg(stats.latest?.weightKg)} detail="Most recent growth measurement." icon={Ruler} tone="growth" />
         <MetricCard
@@ -464,7 +494,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
         />
       </section>
       <section className="grid gap-4 lg:grid-cols-[1.8fr_1fr]">
-        <TimeframedChartCard title="Weight curve" description="Weight-for-age curve with WHO percentile references for the selected timeframe." defaultTimeframe="all">
+        <TimeframedChartCard title="Weight curve" description="Weight-for-age curve with WHO percentile references for the selected timeframe." defaultTimeframe="all" tone="growth">
           {(timeframe) => {
             const weightChart = getWeightCurveChartData(stats.events, profile ?? null, timeframe);
 
@@ -479,6 +509,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
           }}
         </TimeframedChartCard>
         <InsightList
+          tone="growth"
           items={
             profile?.birthDate
               ? stats.insights

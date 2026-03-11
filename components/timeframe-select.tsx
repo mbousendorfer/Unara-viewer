@@ -22,7 +22,7 @@ export function TimeframeSelect({
 }) {
   return (
     <Select value={String(value)} onValueChange={(next) => onChange(next === "all" ? "all" : Number(next) as ChartTimeframe)}>
-      <SelectTrigger className="h-9 w-[92px] bg-card/80 text-xs dark:bg-card">
+      <SelectTrigger className="min-h-11 w-full bg-card/80 text-xs sm:w-[92px] dark:bg-card">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
