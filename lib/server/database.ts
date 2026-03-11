@@ -4,8 +4,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
-const dataDir = path.join(process.cwd(), "data");
-const databasePath = path.join(dataDir, "nara-insights.sqlite");
+const dataDir = process.env.DATA_DIR
+  ? path.resolve(process.env.DATA_DIR)
+  : path.join(process.cwd(), "data");
+const databasePath = path.join(dataDir, "unara-insights.sqlite");
 
 let database: DatabaseSync | null = null;
 

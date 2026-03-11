@@ -44,7 +44,7 @@ export function AppShell({
               <div className="flex flex-wrap items-center gap-2">
                 <div className="inline-flex items-center gap-2 rounded-full bg-primary/12 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
                   <Syringe className="h-3.5 w-3.5" />
-                  Nara Insights
+                  Unara Insights
                 </div>
                 <Badge variant="outline" className="gap-1.5 px-3 py-1">
                   <ShieldCheck className="h-3.5 w-3.5 text-primary" />

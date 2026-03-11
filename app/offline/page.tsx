@@ -8,7 +8,7 @@ export default function OfflinePage() {
       <div className="w-full">
         <StateCard icon={WifiOff} title="You&apos;re offline" tone="info">
           <div className="text-sm leading-6 text-text-secondary">
-            Reconnect to import new CSV files. If you have already opened Nara Insights on this device, the latest cached snapshot will load as soon as the app shell is available.
+            Reconnect to import new CSV files. If you have already opened Unara Insights on this device, the latest cached snapshot will load as soon as the app shell is available.
           </div>
         </StateCard>
       </div>

@@ -84,10 +84,10 @@ export default function HomePage() {
   const growthStats = getGrowthStats(events);
 
   return (
-    <AppShell
-      title="Your baby&apos;s routine at a glance"
-      subtitle="See recent shifts, weekly trends, and where to explore deeper patterns from your Nara Baby exports."
-    >
+      <AppShell
+        title="Your baby&apos;s routine at a glance"
+        subtitle="Read your Nara app export file and explore recent shifts, weekly trends, and deeper patterns in one place."
+      >
       {isLoading ? (
         <LoadingState />
       ) : events.length === 0 && isOffline ? (

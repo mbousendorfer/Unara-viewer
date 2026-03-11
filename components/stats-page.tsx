@@ -144,7 +144,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
 
   if (isLoading) {
     return (
-      <AppShell title="Nara Insights" subtitle="Loading your local analytics snapshot.">
+      <AppShell title="Unara Insights" subtitle="Loading your local analytics snapshot.">
         <LoadingState />
       </AppShell>
     );
@@ -152,7 +152,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
 
   if (events.length === 0) {
     return (
-      <AppShell title="Nara Insights" subtitle="Import data to unlock personal analytics.">
+      <AppShell title="Unara Insights" subtitle="Import data to unlock personal analytics.">
         {isOffline ? <OfflineEmptyState /> : loadError ? <ErrorState message={loadError} /> : <EmptyState />}
       </AppShell>
     );

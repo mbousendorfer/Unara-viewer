@@ -9,14 +9,14 @@ import { themeColors } from "@/design-system/tokens";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Nara Insights",
-  description: "Personal analytics for Nara Baby CSV exports.",
-  applicationName: "Nara Insights",
+  title: "Unara Insights",
+  description: "Personal analytics app that reads Nara app export files.",
+  applicationName: "Unara Insights",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Nara Insights",
+    title: "Unara Insights",
   },
   formatDetection: {
     telephone: false,

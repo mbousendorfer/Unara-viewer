@@ -15,7 +15,7 @@ export function ServiceWorkerRegistration() {
         const cacheNames = await window.caches.keys();
         await Promise.all(
           cacheNames
-            .filter((name) => name.startsWith("nara-insights"))
+            .filter((name) => name.startsWith("nara-insights") || name.startsWith("unara-insights"))
             .map((name) => window.caches.delete(name)),
         );
       }

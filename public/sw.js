@@ -1,4 +1,4 @@
-const CACHE_NAME = "nara-insights-v1";
+const CACHE_NAME = "unara-insights-v1";
 const APP_SHELL = [
   "/",
   "/timeline",

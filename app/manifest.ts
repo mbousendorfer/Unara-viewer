@@ -4,9 +4,9 @@ import { themeColors } from "@/design-system/tokens";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Nara Insights",
-    short_name: "Nara",
-    description: "Personal analytics for Nara Baby CSV exports.",
+    name: "Unara Insights",
+    short_name: "Unara",
+    description: "Personal analytics app that reads Nara app export files.",
     start_url: "/",
     display: "standalone",
     orientation: "portrait",
