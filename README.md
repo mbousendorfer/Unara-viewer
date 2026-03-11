@@ -26,13 +26,13 @@ Run it:
 ```bash
 docker run -d \
   --name unara-insights \
-  -p 3000:3000 \
+  -p 3344:3344 \
   -v /path/on/host/unara-insights:/data \
   --restart unless-stopped \
   unara-insights:latest
 ```
 
-Open `http://localhost:3000`.
+Open `http://localhost:3344`.
 
 ## Publish a pullable Docker image
 
@@ -77,14 +77,14 @@ In Unraid, create a container from the image and set:
 
 - Repository: your image name, for example `ghcr.io/your-user/unara-insights:latest`
 - Network Type: `bridge`
-- Host Port: `3000`
-- Container Port: `3000`
+- Host Port: `3344`
+- Container Port: `3344`
 - Path: map `/mnt/user/appdata/unara-insights` to `/data`
 
 Optional environment variables:
 
 - `DATA_DIR=/data`
-- `PORT=3000`
+- `PORT=3344`
 - `HOSTNAME=0.0.0.0`
 
 If you want HTTPS and a stable domain, put the container behind your existing reverse proxy on Unraid, such as Nginx Proxy Manager, Traefik, or SWAG.
