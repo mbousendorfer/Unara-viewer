@@ -8,6 +8,7 @@ import { useAppData } from "@/components/app-data-provider";
 import { ClearDataButton } from "@/components/clear-data-button";
 import { ImportCard } from "@/components/import-card";
 import { InstallAppButton } from "@/components/install-app-button";
+import { LogoutButton } from "@/components/logout-button";
 import { MobileNav } from "@/components/mobile-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Badge } from "@/components/ui/badge";
@@ -79,6 +80,7 @@ export function AppShell({
             <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:max-w-sm lg:justify-end">
               <ThemeToggle />
               <InstallAppButton />
+              <LogoutButton />
               <div className="w-full sm:min-w-56 sm:flex-1">
                 <ImportCard inline />
               </div>

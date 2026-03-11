@@ -11,6 +11,24 @@ npm run dev
 
 By default, the SQLite database is stored in `./data/unara-insights.sqlite`.
 
+## Basic authentication
+
+The app can be protected with a single username/password pair.
+
+Set these environment variables to enable it:
+
+```bash
+AUTH_USERNAME=admin
+AUTH_PASSWORD=change-me
+AUTH_SECRET=replace-with-a-long-random-string
+```
+
+Notes:
+
+- If `AUTH_USERNAME` and `AUTH_PASSWORD` are not set, authentication stays disabled.
+- `AUTH_SECRET` signs the session cookie. In production, use a long random value.
+- This is intentionally simple auth for a private/self-hosted deployment, not a multi-user account system.
+
 ## Self-hosting with Docker
 
 The app ships with a production `Dockerfile`. The container stores its SQLite database in `/data/unara-insights.sqlite`, so mount `/data` to persistent storage on the host.
@@ -30,6 +48,9 @@ docker run -d \
   -v /path/on/host/unara-insights:/data \
   -e PUID=99 \
   -e PGID=100 \
+  -e AUTH_USERNAME=admin \
+  -e AUTH_PASSWORD=change-me \
+  -e AUTH_SECRET=replace-with-a-long-random-string \
   --restart unless-stopped \
   unara-insights:latest
 ```
@@ -90,6 +111,9 @@ Optional environment variables:
 - `HOSTNAME=0.0.0.0`
 - `PUID=99`
 - `PGID=100`
+- `AUTH_USERNAME=admin`
+- `AUTH_PASSWORD=change-me`
+- `AUTH_SECRET=replace-with-a-long-random-string`
 
 `PUID` and `PGID` let you match the container process with your Unraid user and group so the SQLite file and mounted volume keep the expected ownership.
 
