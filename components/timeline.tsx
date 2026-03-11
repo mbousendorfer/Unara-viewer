@@ -28,44 +28,44 @@ function eventTone(type: EventType) {
   switch (type) {
     case "Bottle Feed":
       return {
-        icon: "bg-[#F6C453]/20 text-[#9B6B00]",
-        dot: "bg-[#F6C453]",
+        icon: "bg-tone-feed/16 text-tone-feed-foreground",
+        dot: "bg-tone-feed",
       };
     case "Sleep":
       return {
-        icon: "bg-[#A9C3E6]/24 text-[#486789]",
-        dot: "bg-[#A9C3E6]",
+        icon: "bg-tone-sleep/16 text-tone-sleep-foreground",
+        dot: "bg-tone-sleep",
       };
     case "Diaper":
       return {
-        icon: "bg-[#E6DCC8]/36 text-[#7A684D]",
-        dot: "bg-[#CDBB9A]",
+        icon: "bg-tone-diaper/18 text-tone-diaper-foreground",
+        dot: "bg-tone-diaper",
       };
     case "Pump":
       return {
-        icon: "bg-[#D6A6A0]/24 text-[#8D5B56]",
-        dot: "bg-[#D6A6A0]",
+        icon: "bg-tone-pump/16 text-tone-pump-foreground",
+        dot: "bg-tone-pump",
       };
     case "Growth":
       return {
-        icon: "bg-[#9CC48D]/24 text-[#4C7053]",
-        dot: "bg-[#9CC48D]",
+        icon: "bg-tone-growth/16 text-tone-growth-foreground",
+        dot: "bg-tone-growth",
       };
     case "Milestone":
       return {
-        icon: "bg-[#8EC1C8]/26 text-[#436E75]",
-        dot: "bg-[#8EC1C8]",
+        icon: "bg-tone-milestone/16 text-tone-milestone-foreground",
+        dot: "bg-tone-milestone",
       };
     case "Medical":
     case "Vaccine":
       return {
-        icon: "bg-[#C6CBE1]/30 text-[#545E83]",
-        dot: "bg-[#98A1C3]",
+        icon: "bg-tone-medical/16 text-tone-medical-foreground",
+        dot: "bg-tone-medical",
       };
     default:
       return {
-        icon: "bg-[#C4B2D6]/24 text-[#6C5A80]",
-        dot: "bg-[#C4B2D6]",
+        icon: "bg-tone-routine/16 text-tone-routine-foreground",
+        dot: "bg-tone-routine",
       };
   }
 }
@@ -335,8 +335,8 @@ export function Timeline({
               className={cn(
                 "min-h-11 rounded-full border px-4 py-2 text-sm font-medium transition",
                 type === "all"
-                  ? "border-transparent bg-foreground text-white dark:border-primary/28 dark:bg-primary/18 dark:text-primary"
-                  : "border-border bg-card/80 text-muted-foreground hover:bg-card hover:text-foreground dark:border-white/12 dark:bg-[#151b1d] dark:text-[#d4d9d1] dark:hover:bg-[#1b2224] dark:hover:text-[#f2f4ee]",
+                  ? "border-transparent bg-primary text-primary-foreground shadow-[var(--shadow-interactive)]"
+                  : "border-border bg-surface text-text-secondary hover:border-border-strong hover:bg-surface-elevated hover:text-text-primary",
               )}
             >
               All
@@ -349,8 +349,8 @@ export function Timeline({
                 className={cn(
                   "min-h-11 rounded-full border px-4 py-2 text-sm font-medium transition",
                   type === eventType
-                    ? "border-transparent bg-foreground text-white dark:border-primary/28 dark:bg-primary/18 dark:text-primary"
-                    : "border-border bg-card/80 text-muted-foreground hover:bg-card hover:text-foreground dark:border-white/12 dark:bg-[#151b1d] dark:text-[#d4d9d1] dark:hover:bg-[#1b2224] dark:hover:text-[#f2f4ee]",
+                    ? "border-transparent bg-primary text-primary-foreground shadow-[var(--shadow-interactive)]"
+                    : "border-border bg-surface text-text-secondary hover:border-border-strong hover:bg-surface-elevated hover:text-text-primary",
                 )}
               >
                 {eventType}
@@ -369,7 +369,7 @@ export function Timeline({
           return (
             <div
               key={event.id}
-              className="relative flex flex-col gap-4 rounded-[1.5rem] border border-border/80 bg-card/90 p-4 shadow-[0_16px_30px_-28px_rgba(67,73,54,0.35)] transition hover:border-foreground/12 hover:shadow-[0_24px_44px_-30px_rgba(67,73,54,0.38)] dark:shadow-[0_24px_50px_-34px_rgba(0,0,0,0.8)]"
+              className="interactive-tile relative flex flex-col gap-4 rounded-[1.5rem] border border-border bg-surface p-4 hover:border-border-strong"
             >
               <div className="flex min-w-0 flex-1 gap-4">
                 <div className={`relative shrink-0 rounded-[1.15rem] p-3 shadow-sm ${tone.icon}`}>
@@ -378,44 +378,44 @@ export function Timeline({
                 <div className="min-w-0 flex-1 space-y-3">
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-medium">{event.type}</p>
+                      <p className="font-medium text-text-primary">{event.type}</p>
                       <span className={`h-2.5 w-2.5 rounded-full ${tone.dot}`} aria-hidden="true" />
                     </div>
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                       <div className="min-w-0">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-text-muted">
                           {context.primaryLabel}
                         </p>
-                        <p className="mt-1 text-3xl font-semibold tracking-tight text-foreground sm:text-[2rem]">
+                        <p className="metric-value mt-1 text-3xl font-semibold tracking-tight text-text-primary sm:text-[2rem]">
                           {metric.value}
                         </p>
                       </div>
-                      <div className="rounded-[1rem] bg-muted/65 px-3 py-2 sm:min-w-28 sm:text-right">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                      <div className="rounded-[1rem] bg-surface-muted px-3 py-2 sm:min-w-28 sm:text-right">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-text-muted">
                           {context.metaLabel}
                         </p>
-                        <p className="mt-1 whitespace-nowrap text-sm font-medium text-foreground">
+                        <p className="mt-1 whitespace-nowrap text-sm font-medium text-text-primary">
                           {context.metaValue}
                         </p>
                       </div>
                     </div>
                   </div>
                   {Array.isArray(context.secondary) ? (
-                    <p className="text-sm leading-6 text-muted-foreground">
+                    <p className="text-sm leading-6 text-text-secondary">
                       {context.secondary.map((item, index) => (
                         <span key={`${item.label}-${item.value}`}>
                           {index > 0 ? " • " : ""}
-                          {item.label} <span className="font-semibold text-foreground">{item.value}</span>
+                          {item.label} <span className="font-semibold text-text-primary">{item.value}</span>
                         </span>
                       ))}
                     </p>
                   ) : context.secondary ? (
-                    <p className="text-sm leading-6 text-muted-foreground">
+                    <p className="text-sm leading-6 text-text-secondary">
                       {context.secondary}
                     </p>
                   ) : null}
                   {"note" in event && event.note ? (
-                    <p className="text-sm leading-6 text-foreground">{event.note}</p>
+                    <p className="text-sm leading-6 text-text-primary">{event.note}</p>
                   ) : null}
                 </div>
               </div>
@@ -423,7 +423,7 @@ export function Timeline({
           );
         })}
         {filtered.length === 0 ? (
-          <div className="rounded-[1.5rem] border border-dashed border-border bg-card/70 p-5 text-sm leading-6 text-muted-foreground">
+          <div className="rounded-[1.5rem] border border-dashed border-border bg-surface p-5 text-sm leading-6 text-text-secondary">
             No events match the current filters. Try a wider date range or switch back to all event types.
           </div>
         ) : null}

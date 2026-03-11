@@ -50,7 +50,7 @@ const diaperSeriesMeta = {
 function TimeframedChartCard({
   title,
   description,
-  defaultTimeframe = 14,
+  defaultTimeframe = 7,
   tone = "routine",
   children,
 }: {
@@ -77,7 +77,7 @@ function TimeframedChartCard({
 function DiaperTypeToggleChart({
   title,
   description,
-  defaultTimeframe = 30,
+  defaultTimeframe = 7,
   tone = "routine",
   renderChart,
 }: {
@@ -494,7 +494,7 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
         />
       </section>
       <section className="grid gap-4 lg:grid-cols-[1.8fr_1fr]">
-        <TimeframedChartCard title="Weight curve" description="Weight-for-age curve with WHO percentile references for the selected timeframe." defaultTimeframe="all" tone="growth">
+        <TimeframedChartCard title="Weight curve" description="Weight-for-age curve with WHO percentile references for the selected timeframe." defaultTimeframe={7} tone="growth">
           {(timeframe) => {
             const weightChart = getWeightCurveChartData(stats.events, profile ?? null, timeframe);
 

@@ -12,7 +12,7 @@ import { useEvents } from "@/hooks/use-events";
 
 export default function TimelinePage() {
   const { events, isLoading, isOffline, loadError, syncedAt } = useEvents();
-  const [rangeStart, setRangeStart] = useState(() => format(subDays(new Date(), 1), "yyyy-MM-dd"));
+  const [rangeStart, setRangeStart] = useState(() => format(subDays(new Date(), 6), "yyyy-MM-dd"));
   const [rangeEnd, setRangeEnd] = useState(() => format(new Date(), "yyyy-MM-dd"));
 
   return (

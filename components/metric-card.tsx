@@ -28,24 +28,24 @@ export function MetricCard({
   const TrendIcon = trendDirection === "up" ? ArrowUpRight : trendDirection === "down" ? ArrowDownRight : Minus;
   const trendClassName =
     trendDirection === "up"
-      ? "bg-[#9CC48D]/22 text-[#446449] dark:bg-[#9CC48D]/18 dark:text-[#D4EFCB]"
+      ? "bg-success/15 text-success"
       : trendDirection === "down"
-        ? "bg-[#A9C3E6]/24 text-[#42637E] dark:bg-[#A9C3E6]/18 dark:text-[#D7E8FB]"
-        : "bg-muted text-muted-foreground dark:bg-muted/80 dark:text-[#E4EAE0]";
+        ? "bg-tone-sleep/16 text-tone-sleep-foreground"
+        : "bg-surface-muted text-text-secondary";
   const cardTintClassName =
     trendDirection === "up"
-      ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,248,239,0.94))] dark:bg-[linear-gradient(180deg,rgba(24,29,31,0.98),rgba(18,30,25,0.96))]"
+      ? "bg-[linear-gradient(180deg,var(--color-surface-elevated),color-mix(in_srgb,var(--color-surface-elevated)_82%,var(--color-success)_18%))]"
       : trendDirection === "down"
-        ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,245,250,0.94))] dark:bg-[linear-gradient(180deg,rgba(24,29,31,0.98),rgba(18,24,31,0.96))]"
-        : "bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,244,238,0.94))] dark:bg-[linear-gradient(180deg,rgba(24,29,31,0.98),rgba(20,24,26,0.96))]";
+        ? "bg-[linear-gradient(180deg,var(--color-surface-elevated),color-mix(in_srgb,var(--color-surface-elevated)_82%,var(--color-tone-sleep)_18%))]"
+        : "bg-surface-elevated";
 
   return (
     <Card className={`h-full overflow-hidden ${cardTintClassName}`}>
       <div className={`h-1.5 w-full ${palette.topBorder}`} />
       <CardHeader className="flex flex-row items-start justify-between space-y-0 gap-4">
         <div>
-          <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-          <div className={`mt-3 text-3xl font-semibold tracking-tight sm:text-[2rem] ${palette.metric}`}>{value}</div>
+          <CardTitle className="text-sm font-medium text-text-secondary">{title}</CardTitle>
+          <div className={`metric-value mt-3 text-3xl font-semibold tracking-tight sm:text-[2rem] ${palette.metric}`}>{value}</div>
         </div>
         <div className={`rounded-[1.25rem] p-3 ${palette.icon}`}>
           <Icon className="h-5 w-5" />
@@ -58,10 +58,10 @@ export function MetricCard({
               <TrendIcon className="h-4 w-4" />
               {trend.display ?? `${trend.value >= 0 ? "+" : ""}${Math.round(trend.value)}${trend.suffix ?? ""}`}
             </div>
-            <p className="text-sm text-muted-foreground">{trend.label}</p>
+            <p className="text-sm text-text-secondary">{trend.label}</p>
           </div>
         ) : null}
-        <p className="text-sm leading-6 text-muted-foreground">{detail}</p>
+        <p className="text-sm leading-6 text-text-secondary">{detail}</p>
       </CardContent>
     </Card>
   );

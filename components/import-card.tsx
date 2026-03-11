@@ -64,7 +64,7 @@ export function ImportCard({ inline = false }: { inline?: boolean }) {
   }
 
   return (
-    <Card className="bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(247,244,238,0.98))] dark:bg-[linear-gradient(180deg,rgba(26,31,33,0.96),rgba(19,24,25,0.96))]">
+    <Card className="bg-surface-elevated">
       <CardHeader>
         <CardTitle>Import CSV</CardTitle>
         <CardDescription>Open the CSV from Files or Downloads to sync your local analytics database using `_activityKey`.</CardDescription>
@@ -72,7 +72,7 @@ export function ImportCard({ inline = false }: { inline?: boolean }) {
       <CardContent className="space-y-4">
         <div
           className={cn(
-            "rounded-[1.5rem] border border-dashed border-border bg-muted/35 p-4 transition",
+            "rounded-[1.5rem] border border-dashed border-border bg-surface-muted p-4 transition-colors",
             isDragging && "border-primary bg-primary/8",
           )}
           onDragOver={(event) => {
@@ -96,8 +96,8 @@ export function ImportCard({ inline = false }: { inline?: boolean }) {
                 <FileUp className="h-5 w-5" />
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-foreground">Large touch target for phone imports</p>
-                <p className="text-sm leading-6 text-muted-foreground">
+                <p className="text-sm font-semibold text-text-primary">Large touch target for phone imports</p>
+                <p className="text-sm leading-6 text-text-secondary">
                   Tap to pick a file, or drag a CSV here on desktop.
                 </p>
               </div>
@@ -106,7 +106,7 @@ export function ImportCard({ inline = false }: { inline?: boolean }) {
           </div>
         </div>
         {summaryLabel ? (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-text-secondary">
             <CheckCircle2 className="h-4 w-4 text-primary" />
             {summaryLabel}
           </div>

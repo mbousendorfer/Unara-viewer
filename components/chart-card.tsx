@@ -17,7 +17,7 @@ export function ChartCard({
   const palette = eventTheme[tone];
 
   return (
-    <Card className="h-full overflow-hidden bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,244,238,0.94))] dark:bg-[linear-gradient(180deg,rgba(26,31,33,0.96),rgba(19,24,25,0.94))]">
+    <Card className="h-full overflow-hidden bg-surface-elevated">
       <div className={`h-1.5 w-full ${palette.topBorder}`} />
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1.5">

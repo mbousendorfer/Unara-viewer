@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 
+import { themeColors } from "@/design-system/tokens";
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Nara Insights",
@@ -8,8 +10,8 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/",
     display: "standalone",
     orientation: "portrait",
-    background_color: "#f7f6f3",
-    theme_color: "#7b8f72",
+    background_color: themeColors.light.background,
+    theme_color: themeColors.light.accent,
     icons: [
       {
         src: "/icon.svg",

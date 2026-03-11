@@ -1,5 +1,7 @@
 import { ImageResponse } from "next/og";
 
+import { themeColors } from "@/design-system/tokens";
+
 export const size = {
   width: 180,
   height: 180,
@@ -17,8 +19,8 @@ export default function AppleIcon() {
           height: "100%",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(180deg, #f6f3eb 0%, #e7efe1 100%)",
-          color: "#334034",
+          background: `linear-gradient(180deg, ${themeColors.light.background} 0%, ${themeColors.light.accent} 100%)`,
+          color: themeColors.light.textPrimary,
           fontSize: 84,
           fontWeight: 700,
           borderRadius: 36,

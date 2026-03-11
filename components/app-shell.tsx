@@ -37,7 +37,7 @@ export function AppShell({
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-5 px-4 pb-[calc(7.25rem+env(safe-area-inset-bottom))] pt-[calc(1rem+env(safe-area-inset-top))] sm:px-6 sm:pb-8 sm:pt-6 lg:px-8">
-      <header className="overflow-hidden rounded-[1.75rem] border border-[#e8e2d8] bg-[#f8f5ef] shadow-[0_28px_80px_-48px_rgba(67,73,54,0.24)] dark:border-white/10 dark:bg-[#171c1d] dark:shadow-[0_28px_80px_-48px_rgba(0,0,0,0.75)] sm:rounded-[2rem]">
+      <header className="surface-blur overflow-hidden rounded-[1.75rem] border border-border bg-surface-elevated shadow-[var(--shadow-elevated)] sm:rounded-[2rem]">
         <div className="flex flex-col gap-5 p-4 sm:p-6 lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-4">
@@ -55,22 +55,22 @@ export function AppShell({
                   Mobile-first PWA
                 </Badge>
                 {isOffline ? (
-                  <Badge variant="outline" className="gap-1.5 border-[#A9C3E6]/60 bg-[#A9C3E6]/10 px-3 py-1 text-[#486789] dark:border-[#A9C3E6]/40 dark:bg-[#A9C3E6]/10 dark:text-[#c4dbf3]">
+                  <Badge variant="outline" className="gap-1.5 border-tone-sleep/30 bg-tone-sleep/10 px-3 py-1 text-tone-sleep-foreground">
                     <WifiOff className="h-3.5 w-3.5" />
                     Offline snapshot
                   </Badge>
                 ) : null}
               </div>
               <div className="space-y-3">
-                <h1 className="max-w-3xl text-3xl leading-tight font-[family-name:var(--font-serif)] tracking-tight text-foreground sm:text-5xl">
+                <h1 className="max-w-3xl text-3xl leading-tight font-[family-name:var(--font-serif)] tracking-tight text-text-primary sm:text-5xl">
                   {title}
                 </h1>
-                <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+                <p className="max-w-2xl text-sm leading-6 text-text-secondary sm:text-base">
                   {subtitle}
                 </p>
               </div>
               {syncedAt ? (
-                <p className="text-xs leading-5 text-muted-foreground">
+                <p className="text-xs leading-5 text-text-muted">
                   Last synced {new Date(syncedAt).toLocaleString()}
                   {isStandalone ? " in the installed app." : "."}
                 </p>
@@ -97,8 +97,8 @@ export function AppShell({
                     className={cn(
                       "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-medium transition",
                       active
-                        ? "border-transparent bg-foreground text-white shadow-[0_16px_28px_-20px_rgba(47,58,50,0.8)] dark:border-primary/28 dark:bg-primary/18 dark:text-primary dark:shadow-none"
-                        : "border-border bg-card/70 text-muted-foreground hover:bg-card hover:text-foreground dark:border-white/12 dark:bg-[#151b1d] dark:text-[#d4d9d1] dark:hover:bg-[#1b2224] dark:hover:text-[#f2f4ee]",
+                        ? "border-transparent bg-primary text-primary-foreground shadow-[var(--shadow-interactive)]"
+                        : "border-border bg-surface text-text-secondary hover:border-border-strong hover:bg-surface-elevated hover:text-text-primary",
                     )}
                     aria-current={active ? "page" : undefined}
                   >

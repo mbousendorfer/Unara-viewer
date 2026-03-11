@@ -18,9 +18,9 @@ import type { DistributionPoint, TrendPoint } from "@/lib/types";
 
 const tooltipStyle = {
   borderRadius: "16px",
-  border: "1px solid rgba(16,32,51,0.08)",
-  backgroundColor: "rgba(255,255,255,0.96)",
-  boxShadow: "0 12px 40px rgba(16,32,51,0.12)",
+  border: "1px solid var(--chart-tooltip-border)",
+  backgroundColor: "var(--chart-tooltip-bg)",
+  boxShadow: "var(--chart-tooltip-shadow)",
 };
 
 function useCompactChart() {
@@ -63,9 +63,9 @@ export function DailyChart({
     <ChartFrame compact={compact}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={compact ? { top: 8, right: 4, left: -18, bottom: 4 } : { top: 8, right: 8, left: -6, bottom: 4 }}>
-          <CartesianGrid vertical={false} stroke="rgba(16,32,51,0.08)" />
-          <XAxis dataKey="label" tickLine={false} axisLine={false} minTickGap={compact ? 20 : 12} tick={{ fontSize: compact ? 11 : 12 }} />
-          <YAxis tickLine={false} axisLine={false} width={compact ? 28 : 36} tick={{ fontSize: compact ? 11 : 12 }} />
+          <CartesianGrid vertical={false} stroke="var(--chart-grid)" />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} minTickGap={compact ? 20 : 12} tick={{ fontSize: compact ? 11 : 12, fill: "var(--chart-axis)" }} />
+          <YAxis tickLine={false} axisLine={false} width={compact ? 28 : 36} tick={{ fontSize: compact ? 11 : 12, fill: "var(--chart-axis)" }} />
           <Tooltip formatter={(value: number) => [`${value}`, valueLabel]} contentStyle={tooltipStyle} />
           <Bar dataKey="value" fill="var(--chart-1)" radius={[12, 12, 0, 0]} maxBarSize={compact ? 22 : 30} />
         </BarChart>
@@ -87,9 +87,9 @@ export function RollingAverageChart({
     <ChartFrame compact={compact}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={compact ? { top: 8, right: 4, left: -18, bottom: 4 } : { top: 8, right: 8, left: -6, bottom: 4 }}>
-          <CartesianGrid vertical={false} stroke="rgba(16,32,51,0.08)" />
-          <XAxis dataKey="label" tickLine={false} axisLine={false} minTickGap={compact ? 22 : 14} tick={{ fontSize: compact ? 11 : 12 }} />
-          <YAxis tickLine={false} axisLine={false} width={compact ? 28 : 36} tick={{ fontSize: compact ? 11 : 12 }} />
+          <CartesianGrid vertical={false} stroke="var(--chart-grid)" />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} minTickGap={compact ? 22 : 14} tick={{ fontSize: compact ? 11 : 12, fill: "var(--chart-axis)" }} />
+          <YAxis tickLine={false} axisLine={false} width={compact ? 28 : 36} tick={{ fontSize: compact ? 11 : 12, fill: "var(--chart-axis)" }} />
           <Tooltip formatter={(value: number) => [`${value}`, valueLabel]} contentStyle={tooltipStyle} />
           <Line type="monotone" dataKey="value" stroke="var(--chart-2)" strokeWidth={compact ? 2.5 : 3} dot={false} />
         </LineChart>
@@ -111,9 +111,9 @@ export function HourlyChart({
     <ChartFrame compact={compact}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={compact ? { top: 8, right: 4, left: -18, bottom: 4 } : { top: 8, right: 8, left: -6, bottom: 4 }}>
-          <CartesianGrid vertical={false} stroke="rgba(16,32,51,0.08)" />
-          <XAxis dataKey="hour" tickLine={false} axisLine={false} minTickGap={compact ? 16 : 18} tick={{ fontSize: compact ? 11 : 12 }} />
-          <YAxis tickLine={false} axisLine={false} width={compact ? 28 : 36} tick={{ fontSize: compact ? 11 : 12 }} />
+          <CartesianGrid vertical={false} stroke="var(--chart-grid)" />
+          <XAxis dataKey="hour" tickLine={false} axisLine={false} minTickGap={compact ? 16 : 18} tick={{ fontSize: compact ? 11 : 12, fill: "var(--chart-axis)" }} />
+          <YAxis tickLine={false} axisLine={false} width={compact ? 28 : 36} tick={{ fontSize: compact ? 11 : 12, fill: "var(--chart-axis)" }} />
           <Tooltip formatter={(value: number) => [`${value}`, valueLabel]} contentStyle={tooltipStyle} />
           <Bar dataKey="value" fill="var(--chart-3)" radius={[10, 10, 0, 0]} maxBarSize={compact ? 18 : 24} />
         </BarChart>
@@ -135,9 +135,9 @@ export function MultiLineChart({
     <ChartFrame compact={compact}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={compact ? { top: 8, right: 4, left: -18, bottom: 4 } : { top: 8, right: 8, left: -6, bottom: 4 }}>
-          <CartesianGrid vertical={false} stroke="rgba(16,32,51,0.08)" />
-          <XAxis dataKey="label" tickLine={false} axisLine={false} minTickGap={compact ? 22 : 14} tick={{ fontSize: compact ? 11 : 12 }} />
-          <YAxis tickLine={false} axisLine={false} width={compact ? 28 : 36} tick={{ fontSize: compact ? 11 : 12 }} />
+          <CartesianGrid vertical={false} stroke="var(--chart-grid)" />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} minTickGap={compact ? 22 : 14} tick={{ fontSize: compact ? 11 : 12, fill: "var(--chart-axis)" }} />
+          <YAxis tickLine={false} axisLine={false} width={compact ? 28 : 36} tick={{ fontSize: compact ? 11 : 12, fill: "var(--chart-axis)" }} />
           <Tooltip contentStyle={tooltipStyle} />
           {lines.map((line) => (
             <Line key={line.key} type="monotone" dataKey={line.key} stroke={line.color} strokeWidth={compact ? 2.5 : 3} dot={!compact} />
@@ -165,25 +165,25 @@ export function WeightCurveChart({
     <ChartFrame compact={compact} tall>
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={data} margin={compact ? { top: 8, right: 6, left: -20, bottom: 4 } : { top: 8, right: 8, left: -6, bottom: 4 }}>
-          <CartesianGrid vertical={false} stroke="rgba(16,32,51,0.08)" />
+          <CartesianGrid vertical={false} stroke="var(--chart-grid)" />
           <XAxis
             dataKey="month"
             type="number"
             tickLine={false}
             axisLine={false}
             domain={xDomain}
-            tick={{ fontSize: compact ? 11 : 12 }}
+            tick={{ fontSize: compact ? 11 : 12, fill: "var(--chart-axis)" }}
             tickFormatter={(value: number) => `${Math.round(value * 10) / 10}m`}
           />
-          <YAxis tickLine={false} axisLine={false} unit="kg" domain={yDomain} width={compact ? 32 : 40} tick={{ fontSize: compact ? 11 : 12 }} />
+          <YAxis tickLine={false} axisLine={false} unit="kg" domain={yDomain} width={compact ? 32 : 40} tick={{ fontSize: compact ? 11 : 12, fill: "var(--chart-axis)" }} />
           <Tooltip contentStyle={tooltipStyle} formatter={(value: number, name: string) => [`${value} kg`, name]} />
           {showWhoBands ? (
             <>
-              <Line type="monotone" dataKey="p3" name="WHO P3" stroke="rgba(30,94,255,0.35)" strokeWidth={1.5} dot={false} />
-              <Line type="monotone" dataKey="p15" name="WHO P15" stroke="rgba(30,94,255,0.45)" strokeWidth={1.5} dot={false} />
-              <Line type="monotone" dataKey="p50" name="WHO P50" stroke="rgba(30,94,255,0.8)" strokeWidth={2.5} dot={false} />
-              <Line type="monotone" dataKey="p85" name="WHO P85" stroke="rgba(30,94,255,0.45)" strokeWidth={1.5} dot={false} />
-              <Line type="monotone" dataKey="p97" name="WHO P97" stroke="rgba(30,94,255,0.35)" strokeWidth={1.5} dot={false} />
+              <Line type="monotone" dataKey="p3" name="WHO P3" stroke="var(--chart-who-soft)" strokeWidth={1.5} dot={false} />
+              <Line type="monotone" dataKey="p15" name="WHO P15" stroke="var(--chart-who-soft)" strokeWidth={1.5} dot={false} />
+              <Line type="monotone" dataKey="p50" name="WHO P50" stroke="var(--chart-who)" strokeWidth={2.5} dot={false} />
+              <Line type="monotone" dataKey="p85" name="WHO P85" stroke="var(--chart-who-soft)" strokeWidth={1.5} dot={false} />
+              <Line type="monotone" dataKey="p97" name="WHO P97" stroke="var(--chart-who-soft)" strokeWidth={1.5} dot={false} />
             </>
           ) : null}
           <Line type="monotone" dataKey="weight" name="Your baby" stroke="var(--chart-3)" strokeWidth={compact ? 2.5 : 3} dot={{ r: compact ? 3 : 4 }} connectNulls />
@@ -208,9 +208,9 @@ export function MultiSeriesBarChart({
     <ChartFrame compact={compact}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={compact ? { top: 8, right: 4, left: -18, bottom: 4 } : { top: 8, right: 8, left: -6, bottom: 4 }}>
-          <CartesianGrid vertical={false} stroke="rgba(16,32,51,0.08)" />
-          <XAxis dataKey={xKey} tickLine={false} axisLine={false} minTickGap={compact ? 16 : 18} tick={{ fontSize: compact ? 11 : 12 }} />
-          <YAxis tickLine={false} axisLine={false} width={compact ? 28 : 36} tick={{ fontSize: compact ? 11 : 12 }} />
+          <CartesianGrid vertical={false} stroke="var(--chart-grid)" />
+          <XAxis dataKey={xKey} tickLine={false} axisLine={false} minTickGap={compact ? 16 : 18} tick={{ fontSize: compact ? 11 : 12, fill: "var(--chart-axis)" }} />
+          <YAxis tickLine={false} axisLine={false} width={compact ? 28 : 36} tick={{ fontSize: compact ? 11 : 12, fill: "var(--chart-axis)" }} />
           <Tooltip contentStyle={tooltipStyle} />
           {series.map((item) => (
             <Bar key={item.key} dataKey={item.key} name={item.label} fill={item.color} radius={[6, 6, 0, 0]} maxBarSize={compact ? 16 : 24} />

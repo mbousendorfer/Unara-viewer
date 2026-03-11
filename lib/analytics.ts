@@ -9,7 +9,6 @@ import {
   parseISO,
   startOfDay,
   subDays,
-  subHours,
 } from "date-fns";
 
 import type {
@@ -61,31 +60,6 @@ function round(value: number, precision = 1) {
 
 export function sortEvents(events: NaraEvent[]) {
   return [...events].sort((a, b) => b.startedAtEpoch - a.startedAtEpoch);
-}
-
-export function getDashboardSummary(events: NaraEvent[], now = new Date()) {
-  const todayStart = startOfDay(now);
-  const last24h = subHours(now, 24);
-
-  const todaysFeeds = events.filter(
-    (event): event is BottleFeedEvent =>
-      event.type === "Bottle Feed" && inWindow(event.startedAt, todayStart, now),
-  );
-  const recentSleep = events.filter(
-    (event): event is SleepEvent =>
-      event.type === "Sleep" && inWindow(event.startedAt, last24h, now),
-  );
-  const todaysDiapers = events.filter(
-    (event): event is DiaperEvent => event.type === "Diaper" && inWindow(event.startedAt, todayStart, now),
-  );
-  const lastGrowth = sortEvents(events).find((event): event is GrowthEvent => event.type === "Growth");
-
-  return {
-    feedTotalMl: todaysFeeds.reduce((sum, event) => sum + (event.totalVolumeMl ?? 0), 0),
-    sleepSeconds: recentSleep.reduce((sum, event) => sum + (event.durationSeconds ?? 0), 0),
-    diaperCount: todaysDiapers.length,
-    lastGrowth,
-  };
 }
 
 export function buildDailyAggregate<T extends NaraEvent>(

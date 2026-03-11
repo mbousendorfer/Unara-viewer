@@ -15,14 +15,14 @@ export function InsightList({
   const palette = eventTheme[tone];
 
   return (
-    <Card className="overflow-hidden bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,244,238,0.94))] dark:bg-[linear-gradient(180deg,rgba(26,31,33,0.96),rgba(19,24,25,0.94))]">
+    <Card className="overflow-hidden bg-surface-elevated">
       <div className={`h-1.5 w-full ${palette.topBorder}`} />
       <CardHeader className="gap-3">
         <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
           <Sparkles className={`h-5 w-5 ${palette.accentText}`} />
           Recent insights
         </CardTitle>
-        <p className="text-sm leading-6 text-muted-foreground">
+        <p className="text-sm leading-6 text-text-secondary">
           Short observations to surface what changed without reading every chart first.
         </p>
       </CardHeader>

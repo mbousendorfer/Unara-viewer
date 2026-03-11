@@ -4,6 +4,7 @@ import Script from "next/script";
 import { AppDataProvider } from "@/components/app-data-provider";
 import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
 import { ThemeProvider } from "@/components/theme-provider";
+import { themeColors } from "@/design-system/tokens";
 
 import "./globals.css";
 
@@ -34,8 +35,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f7f6f3" },
-    { media: "(prefers-color-scheme: dark)", color: "#131718" },
+    { media: "(prefers-color-scheme: light)", color: themeColors.light.background },
+    { media: "(prefers-color-scheme: dark)", color: themeColors.dark.background },
   ],
 };
 

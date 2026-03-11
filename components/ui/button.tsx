@@ -5,17 +5,17 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4",
+  "inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-full border text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4",
   {
     variants: {
       variant: {
         default:
-          "border border-transparent bg-primary text-primary-foreground shadow-[0_14px_28px_-18px_rgba(123,143,114,0.9)] hover:bg-primary/90 dark:border-primary/28 dark:bg-primary/18 dark:text-primary dark:shadow-none dark:hover:border-primary/36 dark:hover:bg-primary/24",
+          "border-transparent bg-primary text-primary-foreground shadow-[var(--shadow-interactive)] hover:bg-primary-strong",
         outline:
-          "border border-border bg-card/85 text-foreground shadow-[0_10px_24px_-20px_rgba(67,73,54,0.45)] hover:bg-card hover:border-foreground/12 dark:border-white/14 dark:bg-[#151b1d] dark:text-[#eef1eb] dark:shadow-[0_14px_28px_-22px_rgba(0,0,0,0.7)] dark:hover:border-white/22 dark:hover:bg-[#1b2224]",
+          "border-border bg-surface text-text-primary hover:border-border-strong hover:bg-surface-elevated",
         secondary:
-          "border border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 dark:border-white/10 dark:bg-[#202729] dark:text-[#eef1eb] dark:hover:bg-[#283032]",
-        ghost: "hover:bg-muted/80 dark:hover:bg-[#262d2f]",
+          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "border-transparent bg-transparent text-text-secondary hover:bg-surface-muted hover:text-text-primary",
       },
       size: {
         default: "px-4 py-2.5",

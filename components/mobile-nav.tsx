@@ -22,7 +22,7 @@ export function MobileNav() {
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border/80 bg-background/90 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur md:hidden"
+      className="surface-blur fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/90 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 md:hidden"
     >
       <div className="mx-auto grid max-w-7xl grid-cols-4 gap-2">
         {mobileNavItems.map((item) => {
@@ -36,8 +36,8 @@ export function MobileNav() {
               className={cn(
                 "flex min-h-14 flex-col items-center justify-center gap-1 rounded-[1.25rem] px-2 py-2 text-[11px] font-medium transition",
                 active
-                  ? "bg-foreground text-white shadow-[0_16px_28px_-22px_rgba(47,58,50,0.85)] dark:border dark:border-primary/28 dark:bg-primary/18 dark:text-primary dark:shadow-none"
-                  : "bg-card/80 text-muted-foreground dark:border dark:border-white/10 dark:bg-[#151b1d] dark:text-[#d4d9d1]",
+                  ? "bg-primary text-primary-foreground shadow-[var(--shadow-interactive)]"
+                  : "border border-transparent bg-surface text-text-secondary hover:border-border hover:bg-surface-elevated hover:text-text-primary",
               )}
               aria-current={active ? "page" : undefined}
             >
