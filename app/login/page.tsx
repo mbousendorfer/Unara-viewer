@@ -1,7 +1,8 @@
-import { redirect } from "next/navigation";
+import Link from "next/link";
 import { LockKeyhole } from "lucide-react";
 
 import { LoginForm } from "@/components/login-form";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isAuthEnabled, isAuthenticated } from "@/lib/server/auth";
 
@@ -12,19 +13,13 @@ type LoginPageProps = {
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  if (!isAuthEnabled()) {
-    redirect("/");
-  }
-
-  if (await isAuthenticated()) {
-    redirect("/");
-  }
-
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const nextPath =
     typeof resolvedSearchParams.next === "string" && resolvedSearchParams.next.startsWith("/")
       ? resolvedSearchParams.next
       : "/";
+  const authEnabled = isAuthEnabled();
+  const authenticated = authEnabled ? await isAuthenticated() : false;
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.18),_transparent_40%),linear-gradient(180deg,_var(--color-surface-muted),_var(--color-background))] px-4 py-10">
@@ -46,7 +41,27 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <LoginForm nextPath={nextPath} />
+          {!authEnabled ? (
+            <div className="space-y-4">
+              <p className="text-sm leading-6 text-text-secondary">
+                L&apos;authentification est désactivée sur ce déploiement. Vous pouvez accéder directement à l&apos;application.
+              </p>
+              <Button asChild className="w-full">
+                <Link href="/">Ouvrir l&apos;application</Link>
+              </Button>
+            </div>
+          ) : authenticated ? (
+            <div className="space-y-4">
+              <p className="text-sm leading-6 text-text-secondary">
+                Votre session semble déjà active. Si vous voyez encore une redirection en boucle, il y a probablement un décalage de configuration d&apos;authentification sur le serveur.
+              </p>
+              <Button asChild className="w-full">
+                <Link href={nextPath}>Continuer</Link>
+              </Button>
+            </div>
+          ) : (
+            <LoginForm nextPath={nextPath} />
+          )}
         </CardContent>
       </Card>
     </main>

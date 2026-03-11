@@ -111,13 +111,16 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith("/api/")) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const response = NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    response.cookies.delete(SESSION_COOKIE_NAME);
+    return response;
   }
 
   const loginUrl = new URL("/login", request.url);
   loginUrl.searchParams.set("next", `${pathname}${search}`);
-
-  return NextResponse.redirect(loginUrl);
+  const response = NextResponse.redirect(loginUrl);
+  response.cookies.delete(SESSION_COOKIE_NAME);
+  return response;
 }
 
 export const config = {
