@@ -30,6 +30,7 @@ export const CHART_TIMEFRAMES = [7, 14, 30, 90, "all"] as const;
 export type ChartTimeframe = (typeof CHART_TIMEFRAMES)[number];
 export const DIAPER_TYPES = ["Wet", "Dirty", "Dirty Wet", "Dry"] as const;
 export type DiaperTypeKey = (typeof DIAPER_TYPES)[number];
+export const FEED_TYPES = ["Formula", "Breast Milk"] as const;
 
 function asDate(value: string) {
   return parseISO(value);
@@ -80,7 +81,7 @@ export function getDashboardSummary(events: NaraEvent[], now = new Date()) {
   const lastGrowth = sortEvents(events).find((event): event is GrowthEvent => event.type === "Growth");
 
   return {
-    feedTotalMl: todaysFeeds.reduce((sum, event) => sum + (event.formulaVolumeMl ?? 0), 0),
+    feedTotalMl: todaysFeeds.reduce((sum, event) => sum + (event.totalVolumeMl ?? 0), 0),
     sleepSeconds: recentSleep.reduce((sum, event) => sum + (event.durationSeconds ?? 0), 0),
     diaperCount: todaysDiapers.length,
     lastGrowth,
@@ -189,6 +190,41 @@ export function buildDiaperHourlySeries(events: DiaperEvent[], timeframe: ChartT
   }));
 }
 
+export function buildFeedDailySeries(events: BottleFeedEvent[], timeframe: ChartTimeframe) {
+  const formula = buildDailyAggregate(events, timeframe, (event) => event.formulaVolumeMl ?? 0);
+  const breastMilk = buildDailyAggregate(events, timeframe, (event) => event.breastMilkVolumeMl ?? 0);
+
+  return formula.map((point, index) => ({
+    label: point.label,
+    formula: point.value,
+    breastMilk: breastMilk[index]?.value ?? 0,
+  }));
+}
+
+export function buildFeedHourlySeries(events: BottleFeedEvent[], timeframe: ChartTimeframe) {
+  const formula = buildHourlyDistribution(events, (event) => event.formulaVolumeMl ?? 0, timeframe);
+  const breastMilk = buildHourlyDistribution(events, (event) => event.breastMilkVolumeMl ?? 0, timeframe);
+
+  return formula.map((point, index) => ({
+    hour: point.hour,
+    formula: point.value,
+    breastMilk: breastMilk[index]?.value ?? 0,
+  }));
+}
+
+function getAverageVolumeForSource(
+  events: BottleFeedEvent[],
+  selector: (event: BottleFeedEvent) => number | null,
+) {
+  const relevantEvents = events.filter((event) => (selector(event) ?? 0) > 0);
+
+  if (relevantEvents.length === 0) {
+    return 0;
+  }
+
+  return relevantEvents.reduce((sum, event) => sum + (selector(event) ?? 0), 0) / relevantEvents.length;
+}
+
 function getAverageGapSeconds<T extends NaraEvent>(events: T[]) {
   const chronological = [...events].reverse();
   const gaps = chronological.slice(1).map((event, index) => {
@@ -263,11 +299,17 @@ function getWeightAgeMonths(startedAt: string, birthDate: string) {
 
 export function getFeedStats(events: NaraEvent[]) {
   const feedEvents = sortEvents(events).filter((event): event is BottleFeedEvent => event.type === "Bottle Feed");
-  const totalMl = feedEvents.reduce((sum, event) => sum + (event.formulaVolumeMl ?? 0), 0);
+  const totalMl = feedEvents.reduce((sum, event) => sum + (event.totalVolumeMl ?? 0), 0);
+  const totalFormulaMl = feedEvents.reduce((sum, event) => sum + (event.formulaVolumeMl ?? 0), 0);
+  const totalBreastMilkMl = feedEvents.reduce((sum, event) => sum + (event.breastMilkVolumeMl ?? 0), 0);
   const averageMl = feedEvents.length ? totalMl / feedEvents.length : 0;
-  const daily = buildDailyAggregate(feedEvents, 14, (event) => (event as BottleFeedEvent).formulaVolumeMl ?? 0);
+  const formulaFeeds = feedEvents.filter((event) => (event.formulaVolumeMl ?? 0) > 0);
+  const breastMilkFeeds = feedEvents.filter((event) => (event.breastMilkVolumeMl ?? 0) > 0);
+  const averageFormulaMl = formulaFeeds.length ? totalFormulaMl / formulaFeeds.length : 0;
+  const averageBreastMilkMl = breastMilkFeeds.length ? totalBreastMilkMl / breastMilkFeeds.length : 0;
+  const daily = buildDailyAggregate(feedEvents, 14, (event) => (event as BottleFeedEvent).totalVolumeMl ?? 0);
   const rollingAverage = buildRollingAverage(daily);
-  const hourly = buildHourlyDistribution(feedEvents, (event) => (event as BottleFeedEvent).formulaVolumeMl ?? 0);
+  const hourly = buildHourlyDistribution(feedEvents, (event) => (event as BottleFeedEvent).totalVolumeMl ?? 0);
   const dailyCounts = buildDailyAggregate(feedEvents, 14, () => 1);
   const averageFeedsPerDay = dailyCounts.length
     ? dailyCounts.reduce((sum, item) => sum + item.value, 0) / dailyCounts.length
@@ -292,12 +334,18 @@ export function getFeedStats(events: NaraEvent[]) {
     return !isBefore(eventDate, previousWeekStart) && isBefore(eventDate, currentWeekStart);
   });
   const currentWeekAverageMl = currentWeekEvents.length
-    ? currentWeekEvents.reduce((sum, event) => sum + (event.formulaVolumeMl ?? 0), 0) / currentWeekEvents.length
+    ? currentWeekEvents.reduce((sum, event) => sum + (event.totalVolumeMl ?? 0), 0) / currentWeekEvents.length
     : 0;
   const previousWeekAverageMl = previousWeekEvents.length
-    ? previousWeekEvents.reduce((sum, event) => sum + (event.formulaVolumeMl ?? 0), 0) / previousWeekEvents.length
+    ? previousWeekEvents.reduce((sum, event) => sum + (event.totalVolumeMl ?? 0), 0) / previousWeekEvents.length
     : 0;
   const weeklyVariationMl = currentWeekAverageMl - previousWeekAverageMl;
+  const currentWeekAverageFormulaMl = getAverageVolumeForSource(currentWeekEvents, (event) => event.formulaVolumeMl);
+  const previousWeekAverageFormulaMl = getAverageVolumeForSource(previousWeekEvents, (event) => event.formulaVolumeMl);
+  const weeklyFormulaVariationMl = currentWeekAverageFormulaMl - previousWeekAverageFormulaMl;
+  const currentWeekAverageBreastMilkMl = getAverageVolumeForSource(currentWeekEvents, (event) => event.breastMilkVolumeMl);
+  const previousWeekAverageBreastMilkMl = getAverageVolumeForSource(previousWeekEvents, (event) => event.breastMilkVolumeMl);
+  const weeklyBreastMilkVariationMl = currentWeekAverageBreastMilkMl - previousWeekAverageBreastMilkMl;
 
   const insights: InsightItem[] = [
     {
@@ -307,8 +355,8 @@ export function getFeedStats(events: NaraEvent[]) {
         : "Not enough feed history yet to estimate spacing between bottles.",
     },
     {
-      title: "Peak feeding window",
-      detail: `${peakHour?.hour ?? "00:00"} is where intake clusters the most across your logs.`,
+      title: "Formula and breast milk split",
+      detail: `${round(totalFormulaMl)} ml formula and ${round(totalBreastMilkMl)} ml breast milk are logged across bottle feeds.`,
     },
     {
       title: "Longest stretch between bottles",
@@ -321,7 +369,11 @@ export function getFeedStats(events: NaraEvent[]) {
   return {
     events: feedEvents,
     totalMl,
+    totalFormulaMl,
+    totalBreastMilkMl,
     averageMl,
+    averageFormulaMl,
+    averageBreastMilkMl,
     daily,
     hourly,
     rollingAverage,
@@ -333,6 +385,12 @@ export function getFeedStats(events: NaraEvent[]) {
     currentWeekAverageMl,
     previousWeekAverageMl,
     weeklyVariationMl,
+    currentWeekAverageFormulaMl,
+    previousWeekAverageFormulaMl,
+    weeklyFormulaVariationMl,
+    currentWeekAverageBreastMilkMl,
+    previousWeekAverageBreastMilkMl,
+    weeklyBreastMilkVariationMl,
   };
 }
 
@@ -460,6 +518,30 @@ export function getDiaperStats(events: NaraEvent[]) {
   const dirtyWetShare = poopEvents.length
     ? ((normalizedTypeCounts.dirtyWet / poopEvents.length) * 100)
     : 0;
+  const currentWeekEvents = filterEventsByTimeframe(diaperEvents, 7);
+  const previousWeekEvents = diaperEvents.filter((event) => {
+    const eventDate = asDate(event.startedAt);
+    const now = new Date();
+    const currentWeekStart = subDays(startOfDay(now), 6);
+    const previousWeekStart = subDays(currentWeekStart, 7);
+    return !isBefore(eventDate, previousWeekStart) && isBefore(eventDate, currentWeekStart);
+  });
+  const currentWeekPoopEvents = currentWeekEvents.filter(
+    (event) => event.diaperType === "Dirty" || event.diaperType === "Dirty Wet",
+  );
+  const previousWeekPoopEvents = previousWeekEvents.filter(
+    (event) => event.diaperType === "Dirty" || event.diaperType === "Dirty Wet",
+  );
+  const currentWeekPoopShare = currentWeekEvents.length ? (currentWeekPoopEvents.length / currentWeekEvents.length) * 100 : 0;
+  const previousWeekPoopShare = previousWeekEvents.length ? (previousWeekPoopEvents.length / previousWeekEvents.length) * 100 : 0;
+  const weeklyPoopShareVariation = currentWeekPoopShare - previousWeekPoopShare;
+  const currentWeekDirtyWetShare = currentWeekPoopEvents.length
+    ? (currentWeekPoopEvents.filter((event) => event.diaperType === "Dirty Wet").length / currentWeekPoopEvents.length) * 100
+    : 0;
+  const previousWeekDirtyWetShare = previousWeekPoopEvents.length
+    ? (previousWeekPoopEvents.filter((event) => event.diaperType === "Dirty Wet").length / previousWeekPoopEvents.length) * 100
+    : 0;
+  const weeklyDirtyWetShareVariation = currentWeekDirtyWetShare - previousWeekDirtyWetShare;
   const insights: InsightItem[] = [
     {
       title: "When poop usually happens",
@@ -503,6 +585,12 @@ export function getDiaperStats(events: NaraEvent[]) {
     poopShare,
     topType,
     dirtyWetShare,
+    currentWeekPoopShare,
+    previousWeekPoopShare,
+    weeklyPoopShareVariation,
+    currentWeekDirtyWetShare,
+    previousWeekDirtyWetShare,
+    weeklyDirtyWetShareVariation,
   };
 }
 
@@ -513,6 +601,21 @@ export function getPumpStats(events: NaraEvent[]) {
   const daily = buildDailyAggregate(pumpEvents, 14, (event) => event.totalVolumeMl ?? 0);
   const rollingAverage = buildRollingAverage(daily);
   const hourly = buildHourlyDistribution(pumpEvents, () => 1);
+  const currentWeekEvents = filterEventsByTimeframe(pumpEvents, 7);
+  const previousWeekEvents = pumpEvents.filter((event) => {
+    const eventDate = asDate(event.startedAt);
+    const now = new Date();
+    const currentWeekStart = subDays(startOfDay(now), 6);
+    const previousWeekStart = subDays(currentWeekStart, 7);
+    return !isBefore(eventDate, previousWeekStart) && isBefore(eventDate, currentWeekStart);
+  });
+  const currentWeekTotalMl = currentWeekEvents.reduce((sum, event) => sum + (event.totalVolumeMl ?? 0), 0);
+  const previousWeekTotalMl = previousWeekEvents.reduce((sum, event) => sum + (event.totalVolumeMl ?? 0), 0);
+  const weeklyTotalMlVariation = currentWeekTotalMl - previousWeekTotalMl;
+  const currentWeekTotalSeconds = currentWeekEvents.reduce((sum, event) => sum + (event.durationSeconds ?? 0), 0);
+  const previousWeekTotalSeconds = previousWeekEvents.reduce((sum, event) => sum + (event.durationSeconds ?? 0), 0);
+  const weeklyTotalSecondsVariation = currentWeekTotalSeconds - previousWeekTotalSeconds;
+  const weeklySessionsVariation = currentWeekEvents.length - previousWeekEvents.length;
   const insights: InsightItem[] = [
     {
       title: "Average pump yield",
@@ -524,7 +627,22 @@ export function getPumpStats(events: NaraEvent[]) {
     },
   ];
 
-  return { events: pumpEvents, totalMl, totalSeconds, daily, hourly, rollingAverage, insights };
+  return {
+    events: pumpEvents,
+    totalMl,
+    totalSeconds,
+    daily,
+    hourly,
+    rollingAverage,
+    insights,
+    currentWeekTotalMl,
+    previousWeekTotalMl,
+    weeklyTotalMlVariation,
+    currentWeekTotalSeconds,
+    previousWeekTotalSeconds,
+    weeklyTotalSecondsVariation,
+    weeklySessionsVariation,
+  };
 }
 
 export function getGrowthStats(events: NaraEvent[]) {

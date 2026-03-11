@@ -25,7 +25,9 @@ export interface BaseEvent {
 
 export interface BottleFeedEvent extends BaseEvent {
   type: "Bottle Feed";
+  totalVolumeMl: number | null;
   formulaVolumeMl: number | null;
+  breastMilkVolumeMl: number | null;
   feedKind: FeedKind;
 }
 

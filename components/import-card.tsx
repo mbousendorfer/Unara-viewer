@@ -1,9 +1,8 @@
 "use client";
 
-import { Upload } from "lucide-react";
+import { CheckCircle2, Upload } from "lucide-react";
 import { useRef } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useImportCsv } from "@/hooks/use-import-csv";
@@ -43,32 +42,24 @@ export function ImportCard({ inline = false }: { inline?: boolean }) {
     return (
       <div className="flex flex-col items-stretch gap-2 sm:items-end">
         {trigger}
-        {summary ? (
-          <div className="flex flex-wrap gap-2 sm:justify-end">
-            <Badge>{summary.inserted} imported</Badge>
-            <Badge variant="secondary">{summary.updated} updated</Badge>
-            <Badge variant="outline">{summary.deleted} removed</Badge>
-          </div>
-        ) : null}
+        {summary ? <p className="text-sm text-muted-foreground sm:text-right">Import completed.</p> : null}
         {error ? <p className="text-sm text-destructive sm:text-right">{error}</p> : null}
       </div>
     );
   }
 
   return (
-    <Card>
+    <Card className="bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(247,244,238,0.98))] dark:bg-[linear-gradient(180deg,rgba(26,31,33,0.96),rgba(19,24,25,0.96))]">
       <CardHeader>
         <CardTitle>Import CSV</CardTitle>
-        <CardDescription>Upload a Nara Baby export to sync the SQLite database using `_activityKey`.</CardDescription>
+        <CardDescription>Upload a Nara Baby export to sync your local analytics database using `_activityKey`.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {trigger}
         {summary ? (
-          <div className="flex flex-wrap gap-2">
-            <Badge>{summary.inserted} imported</Badge>
-            <Badge variant="secondary">{summary.updated} updated</Badge>
-            <Badge variant="outline">{summary.deleted} removed</Badge>
-            <Badge variant="outline">{summary.totalRows} rows in CSV</Badge>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <CheckCircle2 className="h-4 w-4 text-primary" />
+            Import completed successfully.
           </div>
         ) : null}
         {error ? <p className="text-sm text-destructive">{error}</p> : null}

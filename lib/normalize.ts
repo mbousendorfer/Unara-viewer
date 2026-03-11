@@ -117,21 +117,28 @@ export function normalizeRow(input: Record<string, string>): NaraEvent | null {
 
   switch (base.type) {
     case "Bottle Feed": {
+      const formulaVolumeMl = normalizeVolumeToMl(
+        row["[Bottle Feed] Formula Volume"],
+        row["[Bottle Feed] Formula Volume Unit"],
+      );
+      const breastMilkVolumeMl = normalizeVolumeToMl(
+        row["[Bottle Feed] Breast Milk Volume"],
+        row["[Bottle Feed] Breast Milk Volume Unit"],
+      );
+      const explicitTotalVolumeMl = normalizeVolumeToMl(
+        row["[Bottle Feed] Volume"],
+        row["[Bottle Feed] Volume Unit"],
+      );
       const totalVolumeMl =
-        normalizeVolumeToMl(row["[Bottle Feed] Volume"], row["[Bottle Feed] Volume Unit"]) ??
-        normalizeVolumeToMl(
-          row["[Bottle Feed] Formula Volume"],
-          row["[Bottle Feed] Formula Volume Unit"],
-        ) ??
-        normalizeVolumeToMl(
-          row["[Bottle Feed] Breast Milk Volume"],
-          row["[Bottle Feed] Breast Milk Volume Unit"],
-        );
+        explicitTotalVolumeMl ??
+        ((formulaVolumeMl ?? 0) + (breastMilkVolumeMl ?? 0) || null);
 
       return {
         ...base,
         type: "Bottle Feed",
-        formulaVolumeMl: totalVolumeMl,
+        totalVolumeMl,
+        formulaVolumeMl,
+        breastMilkVolumeMl,
         feedKind: normalizeFeedKind(row["[Bottle Feed] Type"]),
       } satisfies BottleFeedEvent;
     }

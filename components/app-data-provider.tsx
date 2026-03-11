@@ -18,10 +18,12 @@ type AppDataContextValue = {
   profile: ProfileMetadata | null;
   isLoading: boolean;
   isImporting: boolean;
+  isClearing: boolean;
   importSummary: ImportSummary | null;
   importError: string | null;
   refresh: () => Promise<void>;
   importFile: (file: File) => Promise<void>;
+  clearData: () => Promise<void>;
 };
 
 const AppDataContext = createContext<AppDataContextValue | null>(null);
@@ -31,6 +33,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<ProfileMetadata | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isImporting, setIsImporting] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
   const [importSummary, setImportSummary] = useState<ImportSummary | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
 
@@ -86,18 +89,45 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     }
   }, [refresh]);
 
+  const clearData = useCallback(async () => {
+    setIsClearing(true);
+    setImportError(null);
+
+    try {
+      const response = await fetch("/api/data", {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Unable to erase stored data.");
+      }
+
+      startTransition(() => {
+        setEvents([]);
+        setProfile(null);
+        setImportSummary(null);
+      });
+    } catch (error) {
+      setImportError(error instanceof Error ? error.message : "Unable to erase stored data.");
+    } finally {
+      setIsClearing(false);
+    }
+  }, []);
+
   const value = useMemo<AppDataContextValue>(
     () => ({
       events,
       profile,
       isLoading,
       isImporting,
+      isClearing,
       importSummary,
       importError,
       refresh,
       importFile,
+      clearData,
     }),
-    [events, profile, isLoading, isImporting, importSummary, importError, refresh, importFile],
+    [events, profile, isLoading, isImporting, isClearing, importSummary, importError, refresh, importFile, clearData],
   );
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;

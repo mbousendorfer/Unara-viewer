@@ -1,31 +1,56 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f4f7fb;
-  --foreground: #102033;
-  --card: rgba(255, 255, 255, 0.9);
-  --card-foreground: #102033;
+  --background: #f7f6f3;
+  --foreground: #2f3a32;
+  --card: rgba(255, 255, 255, 0.94);
+  --card-foreground: #2f3a32;
   --popover: #ffffff;
-  --popover-foreground: #102033;
-  --primary: #1e5eff;
+  --popover-foreground: #2f3a32;
+  --primary: #7b8f72;
   --primary-foreground: #ffffff;
-  --secondary: #dbe7ff;
-  --secondary-foreground: #16346e;
-  --muted: #e7edf7;
-  --muted-foreground: #58708f;
-  --accent: #daf5ef;
-  --accent-foreground: #155248;
-  --destructive: #d64545;
+  --secondary: #ede7dc;
+  --secondary-foreground: #5d665a;
+  --muted: #f1ede5;
+  --muted-foreground: #697568;
+  --accent: #edf2e7;
+  --accent-foreground: #445041;
+  --destructive: #b55f56;
   --destructive-foreground: #ffffff;
-  --border: rgba(16, 32, 51, 0.08);
-  --input: rgba(16, 32, 51, 0.08);
-  --ring: rgba(30, 94, 255, 0.35);
-  --radius: 1rem;
-  --chart-1: #1e5eff;
-  --chart-2: #00a67e;
-  --chart-3: #ff8a3d;
-  --chart-4: #7856ff;
-  --chart-5: #ff5d8f;
+  --border: rgba(47, 58, 50, 0.09);
+  --input: rgba(47, 58, 50, 0.08);
+  --ring: rgba(123, 143, 114, 0.3);
+  --radius: 1.25rem;
+  --chart-1: #f6c453;
+  --chart-2: #a9c3e6;
+  --chart-3: #d6a6a0;
+  --chart-4: #9cc48d;
+  --chart-5: #c4b2d6;
+  --font-sans: "Avenir Next", "Nunito Sans", "Segoe UI", sans-serif;
+  --font-serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+}
+
+.dark {
+  --background: #131718;
+  --foreground: #edf0e8;
+  --card: rgba(24, 29, 31, 0.92);
+  --card-foreground: #edf0e8;
+  --popover: #181d1f;
+  --popover-foreground: #edf0e8;
+  --primary: #a6bf9e;
+  --primary-foreground: #101413;
+  --secondary: #2b3332;
+  --secondary-foreground: #d7ddd2;
+  --muted: #202728;
+  --muted-foreground: #a7b0a6;
+  --accent: #283131;
+  --accent-foreground: #dfe6da;
+  --destructive: #d07d73;
+  --destructive-foreground: #120f0f;
+  --border: rgba(237, 240, 232, 0.1);
+  --input: rgba(237, 240, 232, 0.1);
+  --ring: rgba(166, 191, 158, 0.35);
 }
 
 @theme inline {
@@ -52,6 +77,8 @@
   --radius-md: calc(var(--radius) - 0.125rem);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 0.25rem);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
 }
 
 * {
@@ -60,14 +87,25 @@
 
 body {
   @apply bg-background text-foreground antialiased;
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans);
   background-image:
-    radial-gradient(circle at top left, rgba(30, 94, 255, 0.12), transparent 28rem),
-    radial-gradient(circle at top right, rgba(0, 166, 126, 0.12), transparent 22rem),
-    linear-gradient(180deg, #fbfcff 0%, #f4f7fb 100%);
+    radial-gradient(circle at top left, rgba(246, 196, 83, 0.18), transparent 26rem),
+    radial-gradient(circle at top right, rgba(169, 195, 230, 0.16), transparent 24rem),
+    linear-gradient(180deg, #fbfaf7 0%, #f7f6f3 45%, #f2efe8 100%);
   min-height: 100vh;
 }
 
+.dark body {
+  background-image:
+    radial-gradient(circle at top left, rgba(246, 196, 83, 0.09), transparent 26rem),
+    radial-gradient(circle at top right, rgba(169, 195, 230, 0.1), transparent 24rem),
+    linear-gradient(180deg, #171c1d 0%, #131718 45%, #101314 100%);
+}
+
 a {
-  @apply text-inherit no-underline;
+  @apply no-underline;
+}
+
+::selection {
+  background: rgba(196, 178, 214, 0.35);
 }

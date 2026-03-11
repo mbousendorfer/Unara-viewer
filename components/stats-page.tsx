@@ -5,7 +5,7 @@ import { Activity, Clock3, Droplets, Milk, Ruler } from "lucide-react";
 
 import { AppShell } from "@/components/app-shell";
 import { ChartCard } from "@/components/chart-card";
-import { DailyChart, HourlyChart, MultiSeriesBarChart, RollingAverageChart, WeightCurveChart } from "@/components/charts";
+import { DailyChart, HourlyChart, MultiLineChart, MultiSeriesBarChart, RollingAverageChart, WeightCurveChart } from "@/components/charts";
 import { EmptyState } from "@/components/empty-state";
 import { InsightList } from "@/components/insight-list";
 import { MetricCard } from "@/components/metric-card";
@@ -13,6 +13,8 @@ import { TimeframeSelect } from "@/components/timeframe-select";
 import { useEvents } from "@/hooks/use-events";
 import { useProfileMetadata } from "@/hooks/use-profile-metadata";
 import {
+  buildFeedDailySeries,
+  buildFeedHourlySeries,
   buildDailyAggregate,
   buildDiaperDailySeries,
   buildDiaperHourlySeries,
@@ -107,7 +109,7 @@ function DiaperTypeToggleChart({
               type="button"
               onClick={() => toggleType(type)}
               className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
-                active ? "border-transparent text-white" : "border-border bg-white/60 text-muted-foreground"
+                active ? "border-transparent text-white" : "border-border bg-card/70 text-muted-foreground dark:bg-card"
               }`}
               style={active ? { backgroundColor: meta.color } : undefined}
             >
@@ -137,52 +139,90 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
     const stats = getFeedStats(events);
     return (
       <AppShell title="Feed Analytics" subtitle="Bottle rhythm, timing patterns, and practical feeding trends.">
-        <section className="grid gap-4 md:grid-cols-3">
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <MetricCard
-            title="Weekly variation"
-            value={`${stats.weeklyVariationMl >= 0 ? "+" : ""}${Math.round(stats.weeklyVariationMl)} ml`}
-            detail="Difference between this week's average bottle and last week's."
+            title="Typical total bottle"
+            value={formatVolumeMl(stats.averageMl)}
+            detail="Average total intake per bottle across the imported log."
             icon={Milk}
+            tone="feed"
+            trend={{ value: stats.weeklyVariationMl, label: "vs last week", suffix: " ml" }}
           />
           <MetricCard
-            title="Typical bottle"
-            value={formatVolumeMl(stats.averageMl)}
-            detail="Average amount per bottle feed."
+            title="Typical formula bottle"
+            value={formatVolumeMl(stats.averageFormulaMl)}
+            detail="Average formula intake when a bottle includes formula."
             icon={Milk}
+            tone="feed"
+            trend={{ value: stats.weeklyFormulaVariationMl, label: "vs last week", suffix: " ml" }}
+          />
+          <MetricCard
+            title="Typical breast milk bottle"
+            value={formatVolumeMl(stats.averageBreastMilkMl)}
+            detail="Average breast milk intake when a bottle includes breast milk."
+            icon={Milk}
+            tone="feed"
+            trend={{ value: stats.weeklyBreastMilkVariationMl, label: "vs last week", suffix: " ml" }}
           />
           <MetricCard
             title="Typical spacing"
             value={formatDurationFromSeconds(stats.averageGapSeconds)}
             detail="Average time between logged bottles."
             icon={Activity}
+            tone="feed"
           />
         </section>
         <section className="grid gap-4 lg:grid-cols-2">
-          <TimeframedChartCard title="Daily aggregates" description="Bottle intake volume for the selected timeframe.">
+          <TimeframedChartCard title="Daily intake by source" description="Formula and breast milk intake across the selected timeframe.">
             {(timeframe) => (
-              <DailyChart
-                data={buildDailyAggregate(stats.events, timeframe, (event) => event.formulaVolumeMl ?? 0)}
-                valueLabel="ml"
+              <MultiSeriesBarChart
+                data={buildFeedDailySeries(stats.events, timeframe)}
+                xKey="label"
+                series={[
+                  { key: "formula", label: "Formula", color: "var(--chart-1)" },
+                  { key: "breastMilk", label: "Breast Milk", color: "var(--chart-2)" },
+                ]}
               />
             )}
           </TimeframedChartCard>
-          <TimeframedChartCard title="Hourly distribution" description="When bottle feeds cluster through the day for the selected timeframe.">
+          <TimeframedChartCard title="Hourly intake by source" description="When formula and breast milk intake cluster through the day.">
             {(timeframe) => (
-              <HourlyChart
-                data={buildHourlyDistribution(stats.events, (event) => event.formulaVolumeMl ?? 0, timeframe)}
-                valueLabel="ml"
+              <MultiSeriesBarChart
+                data={buildFeedHourlySeries(stats.events, timeframe)}
+                xKey="hour"
+                series={[
+                  { key: "formula", label: "Formula", color: "var(--chart-1)" },
+                  { key: "breastMilk", label: "Breast Milk", color: "var(--chart-2)" },
+                ]}
               />
             )}
           </TimeframedChartCard>
         </section>
         <section className="grid gap-4 lg:grid-cols-[1.8fr_1fr]">
-          <TimeframedChartCard title="Rolling average" description="7-day smoothing of feed totals for the selected timeframe.">
-            {(timeframe) => (
-              <RollingAverageChart
-                data={buildRollingAverage(buildDailyAggregate(stats.events, timeframe, (event) => event.formulaVolumeMl ?? 0))}
-                valueLabel="ml"
-              />
-            )}
+          <TimeframedChartCard title="Rolling average by source" description="7-day smoothing of formula and breast milk intake for the selected timeframe.">
+            {(timeframe) => {
+              const series = buildFeedDailySeries(stats.events, timeframe);
+              const formulaRolling = buildRollingAverage(
+                series.map((item) => ({ label: item.label, value: item.formula })),
+              );
+              const breastMilkRolling = buildRollingAverage(
+                series.map((item) => ({ label: item.label, value: item.breastMilk })),
+              );
+
+              return (
+                <MultiLineChart
+                  data={series.map((point, index) => ({
+                    label: point.label,
+                    formula: formulaRolling[index]?.value ?? 0,
+                    breastMilk: breastMilkRolling[index]?.value ?? 0,
+                  }))}
+                  lines={[
+                    { key: "formula", label: "Formula", color: "var(--chart-1)" },
+                    { key: "breastMilk", label: "Breast Milk", color: "var(--chart-2)" },
+                  ]}
+                />
+              );
+            }}
           </TimeframedChartCard>
           <InsightList items={stats.insights} />
         </section>
@@ -197,21 +237,34 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
         <section className="grid gap-4 md:grid-cols-3">
           <MetricCard
             title="Typical stretch variation"
-            value={`${stats.weeklyTypicalStretchVariationSeconds >= 0 ? "+" : ""}${formatDurationFromSeconds(Math.abs(stats.weeklyTypicalStretchVariationSeconds))}`}
-            detail="Difference between this week's average stretch and last week's."
-            icon={Clock3}
-          />
-          <MetricCard
-            title="Typical stretch"
             value={formatDurationFromSeconds(stats.averageSeconds)}
             detail="Average sleep duration per logged session."
             icon={Clock3}
+            tone="sleep"
+            trend={{
+              value: stats.weeklyTypicalStretchVariationSeconds,
+              label: "vs last week",
+              display: `${stats.weeklyTypicalStretchVariationSeconds >= 0 ? "+" : "-"}${formatDurationFromSeconds(Math.abs(stats.weeklyTypicalStretchVariationSeconds))}`,
+            }}
+          />
+          <MetricCard
+            title="Longest recent stretch"
+            value={formatDurationFromSeconds(stats.longestSleepSeconds)}
+            detail="Longest logged sleep session in the imported history."
+            icon={Clock3}
+            tone="sleep"
           />
           <MetricCard
             title="Longest stretch variation"
-            value={`${stats.weeklyLongestStretchVariationSeconds >= 0 ? "+" : ""}${formatDurationFromSeconds(Math.abs(stats.weeklyLongestStretchVariationSeconds))}`}
-            detail="Difference between this week's longest stretch and last week's."
+            value={formatDurationFromSeconds(Math.max(stats.longestSleepSeconds, 0))}
+            detail="Longest stretch compared with the previous week."
             icon={Activity}
+            tone="sleep"
+            trend={{
+              value: stats.weeklyLongestStretchVariationSeconds,
+              label: "vs last week",
+              display: `${stats.weeklyLongestStretchVariationSeconds >= 0 ? "+" : "-"}${formatDurationFromSeconds(Math.abs(stats.weeklyLongestStretchVariationSeconds))}`,
+            }}
           />
         </section>
         <section className="grid gap-4 lg:grid-cols-2">
@@ -257,24 +310,30 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
             value={stats.topType?.[0] ?? "No data"}
             detail="Most frequent diaper type across the imported log."
             icon={Droplets}
+            tone="diaper"
           />
           <MetricCard
             title="Poop share"
             value={`${Math.round(stats.poopShare)}%`}
             detail="Share of diaper logs that include poop."
             icon={Droplets}
+            tone="diaper"
+            trend={{ value: stats.weeklyPoopShareVariation, label: "vs last week", suffix: " pts" }}
           />
           <MetricCard
             title="Typical poop window"
             value={stats.poopPeakHour.hour}
             detail={`${stats.poopPeakDaypart.label} is the most poop-heavy part of day.`}
             icon={Activity}
+            tone="diaper"
           />
           <MetricCard
             title="Dirty+wet share"
             value={`${Math.round(stats.dirtyWetShare)}%`}
             detail="Share of poop diapers that are also wet."
             icon={Droplets}
+            tone="diaper"
+            trend={{ value: stats.weeklyDirtyWetShareVariation, label: "vs last week", suffix: " pts" }}
           />
         </section>
         <section className="grid gap-4 lg:grid-cols-2">
@@ -321,9 +380,34 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
     return (
       <AppShell title="Pump Analytics" subtitle="Yield, duration, and session timing for pumping records.">
         <section className="grid gap-4 md:grid-cols-3">
-          <MetricCard title="Total yield" value={formatVolumeMl(stats.totalMl)} detail="Combined across all pump sessions." icon={Activity} />
-          <MetricCard title="Total time" value={formatDurationFromSeconds(stats.totalSeconds)} detail="Total pumping time recorded." icon={Clock3} />
-          <MetricCard title="Sessions" value={String(stats.events.length)} detail="Logged pump events." icon={Activity} />
+          <MetricCard
+            title="Total yield"
+            value={formatVolumeMl(stats.totalMl)}
+            detail="Combined across all pump sessions."
+            icon={Activity}
+            tone="pump"
+            trend={{ value: stats.weeklyTotalMlVariation, label: "vs last week", suffix: " ml" }}
+          />
+          <MetricCard
+            title="Total time"
+            value={formatDurationFromSeconds(stats.totalSeconds)}
+            detail="Total pumping time recorded."
+            icon={Clock3}
+            tone="pump"
+            trend={{
+              value: stats.weeklyTotalSecondsVariation,
+              label: "vs last week",
+              display: `${stats.weeklyTotalSecondsVariation >= 0 ? "+" : "-"}${formatDurationFromSeconds(Math.abs(stats.weeklyTotalSecondsVariation))}`,
+            }}
+          />
+          <MetricCard
+            title="Sessions"
+            value={String(stats.events.length)}
+            detail="Logged pump events."
+            icon={Activity}
+            tone="pump"
+            trend={{ value: stats.weeklySessionsVariation, label: "vs last week" }}
+          />
         </section>
         <section className="grid gap-4 lg:grid-cols-2">
           <TimeframedChartCard title="Daily yield" description="Pump volume for the selected timeframe.">
@@ -363,18 +447,20 @@ export function StatsPage({ kind }: { kind: StatsKind }) {
   return (
     <AppShell title="Growth Analytics" subtitle="Weight curve over age, with WHO reference curves in the background.">
       <section className="grid gap-4 md:grid-cols-3">
-        <MetricCard title="Latest weight" value={formatWeightKg(stats.latest?.weightKg)} detail="Most recent growth measurement." icon={Ruler} />
+        <MetricCard title="Latest weight" value={formatWeightKg(stats.latest?.weightKg)} detail="Most recent growth measurement." icon={Ruler} tone="growth" />
         <MetricCard
           title="Profile sex"
           value={profile?.sex ?? "Unknown"}
           detail="Used to select the correct WHO weight-for-age references."
           icon={Ruler}
+          tone="growth"
         />
         <MetricCard
           title="Birth date"
           value={profile?.birthDate ?? "Unknown"}
           detail="Needed to convert each weight measurement to age in months."
           icon={Ruler}
+          tone="growth"
         />
       </section>
       <section className="grid gap-4 lg:grid-cols-[1.8fr_1fr]">

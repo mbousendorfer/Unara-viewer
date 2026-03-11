@@ -105,3 +105,18 @@ export function syncEventsToDatabase(events: NaraEvent[], profile: ProfileMetada
     throw error;
   }
 }
+
+export function clearAllData() {
+  const db = getDatabase();
+
+  db.exec("BEGIN");
+
+  try {
+    db.prepare("DELETE FROM events").run();
+    db.prepare("DELETE FROM metadata").run();
+    db.exec("COMMIT");
+  } catch (error) {
+    db.exec("ROLLBACK");
+    throw error;
+  }
+}
