@@ -28,6 +28,8 @@ docker run -d \
   --name unara-insights \
   -p 3344:3344 \
   -v /path/on/host/unara-insights:/data \
+  -e PUID=99 \
+  -e PGID=100 \
   --restart unless-stopped \
   unara-insights:latest
 ```
@@ -86,5 +88,9 @@ Optional environment variables:
 - `DATA_DIR=/data`
 - `PORT=3344`
 - `HOSTNAME=0.0.0.0`
+- `PUID=99`
+- `PGID=100`
+
+`PUID` and `PGID` let you match the container process with your Unraid user and group so the SQLite file and mounted volume keep the expected ownership.
 
 If you want HTTPS and a stable domain, put the container behind your existing reverse proxy on Unraid, such as Nginx Proxy Manager, Traefik, or SWAG.
